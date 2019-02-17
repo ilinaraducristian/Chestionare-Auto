@@ -1,2 +1,2 @@
 FROM mvertes/alpine-mongo
-COPY ./db /data/
+COPY ./db /data/db
