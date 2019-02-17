@@ -1,0 +1,32 @@
+<div *ngIf="this.session" class="container-fluid">
+  <h3 class="row col-10 offset-1 justify-content-center">
+    {{ this.session.questions[0].question }}
+  </h3>
+  <div class="row offset-1">
+    <span class="badge badge-pill badge-warning col-2 offset-1"
+      >Timp ramas: {{ this.time }}</span
+    >
+    <span class="badge badge-pill badge-info col-2"
+      >Intrebari ramase:
+      {{ 26 - this.session.correct_answers - this.session.wrong_answers }}</span
+    >
+    <span class="badge badge-pill badge-success col-2"
+      >Raspunsuri corecte: {{ this.session.correct_answers }}</span
+    >
+    <span class="badge badge-pill badge-danger col-2"
+      >Raspunsuri gresite: {{ this.session.wrong_answers }}</span
+    >
+  </div>
+
+  <div class="list-group row col-8 offset-2">
+    <a
+      *ngFor="let answer of this.session.questions[0].answers; let i = index"
+      class="list-group-item list-group-item-action"
+      href="#"
+      [ngClass]="{ active: this.answers[i] }"
+      (click)="this.select_answer(i)"
+    >
+      {{ answer }}
+    </a>
+  </div>
+</div>

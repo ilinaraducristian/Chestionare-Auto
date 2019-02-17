@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  database:
+    build: ./Chestionare-Auto-Database
+    ports:
+      - 27017:27017
+
+  backend:
+    build: ./Chestionare-Auto-Backend
+    ports:
+      - 8888:8888
+    depends_on:
+      - database
+    volumes:
+      - ./Chestionare-Auto-Backend:/usr/src/
+
+  frontend:
+    build: ./Chestionare-Auto-Frontend
+    ports:
+      - 4200:4200
+    volumes:
+      - ./Chestionare-Auto-Frontend:/usr/src/

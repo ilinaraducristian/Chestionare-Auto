@@ -1,0 +1,38 @@
+# compiled output
+/Chestionare-Auto-Frontend/dist
+/Chestionare-Auto-Frontend/tmp
+/Chestionare-Auto-Frontend/out-tsc
+
+# dependencies
+/Chestionare-Auto-Frontend/node_modules
+/Chestionare-Auto-Backend/node_modules
+
+# profiling files
+/Chestionare-Auto-Frontendchrome-profiler-events.json
+/Chestionare-Auto-Frontendspeed-measure-plugin.json
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode
+
+# misc
+/Chestionare-Auto-Frontend/.sass-cache
+/Chestionare-Auto-Frontend/connect.lock
+/Chestionare-Auto-Frontend/coverage
+/Chestionare-Auto-Frontend/libpeerconnection.log
+/Chestionare-Auto-Frontendnpm-debug.log
+/Chestionare-Auto-Frontendyarn-error.log
+/Chestionare-Auto-Frontendtestem.log
+/Chestionare-Auto-Frontend/typings
+
+# System Files
+.DS_Store
+Thumbs.db

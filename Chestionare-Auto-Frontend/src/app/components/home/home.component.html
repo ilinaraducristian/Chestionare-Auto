@@ -1,0 +1,6 @@
+<div class="container-fluid btn-group btn-group-toggle">
+  <label *ngFor="let category of categories" class="btn-primary" ngbButtonLabel>
+    <input type="checkbox" ngbButton (click)="this.new_session(category)" />
+    {{ category }}
+  </label>
+</div>
