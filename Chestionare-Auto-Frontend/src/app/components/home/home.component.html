@@ -1,6 +1,16 @@
-<div class="container-fluid btn-group btn-group-toggle">
-  <label *ngFor="let category of categories" class="btn-primary" ngbButtonLabel>
-    <input type="checkbox" ngbButton (click)="this.new_session(category)" />
-    {{ category }}
-  </label>
+<div class="container-fluid ">
+  <h1 class="row col-12 justify-content-center">Chestionare Auto</h1>
+  <div
+    class="container-fluid col-10 col-sm-8 col-md-6 col-lg-4 justify-content-center"
+  >
+    <div
+      class="btn-group btn-group-toggle col-12 "
+      *ngFor="let category of categories"
+    >
+      <label class="btn-primary" ngbButtonLabel>
+        <input type="checkbox" ngbButton (click)="this.new_session(category)" />
+        {{ category }}
+      </label>
+    </div>
+  </div>
 </div>

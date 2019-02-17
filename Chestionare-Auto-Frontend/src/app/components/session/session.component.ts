@@ -10,9 +10,8 @@ import { Session } from "src/app/interfaces/session";
 })
 export class SessionComponent implements OnInit {
   private session: Session;
-  private time: string = "";
-  private internal_clock: Function;
-  private internal_time: number;
+  private time_manager: NodeJS.Timer;
+  private remaining_time: Date = new Date(1800000);
   private answers: Array<boolean> = [false, false, false];
 
   constructor(
@@ -27,18 +26,11 @@ export class SessionComponent implements OnInit {
 
   set_session(session: Session) {
     this.session = session;
-    this.internal_time = Math.floor(
-      new Date(
-        new Date(session.expiration_date).getTime() -
-          new Date(session.now).getTime()
-      ).getTime() / 1000
-    );
-    this.internal_clock = function() {
-      this.internal_time--;
-      this.internal_clock =
-        Math.floor(this.internal_time / 60) + ":" + (this.internal_time % 60);
-    };
-    setInterval(this.internal_clock, 1000);
+    this.time_manager = setInterval(() => {
+      this.remaining_time.setTime(this.remaining_time.getTime() - 1000);
+      if (this.remaining_time.getTime() - 1000 <= 0)
+        clearInterval(this.time_manager);
+    }, 1000);
   }
 
   ngOnInit() {
