@@ -11,7 +11,7 @@ import { Session } from "src/app/interfaces/session";
 export class SessionComponent implements OnInit {
   private session: Session;
   private time_manager: NodeJS.Timer;
-  private remaining_time: Date = new Date(1800000);
+  private remaining_time: Date;
   private answers: Array<boolean> = [false, false, false];
 
   constructor(
@@ -26,6 +26,17 @@ export class SessionComponent implements OnInit {
 
   set_session(session: Session) {
     this.session = session;
+    // expiration_date = created_at + 30 minutes
+    // remaining_time = expiration_date - now
+    console.log(session.created_at);
+    console.log(session.now);
+    console.log(
+      Date.parse(session.created_at) + 1800000 - Date.parse(session.now)
+    );
+    this.remaining_time = new Date(
+      Date.parse(session.created_at) + 1800000 - Date.parse(session.now)
+    );
+
     this.time_manager = setInterval(() => {
       this.remaining_time.setTime(this.remaining_time.getTime() - 1000);
       if (this.remaining_time.getTime() - 1000 <= 0)

@@ -11,6 +11,7 @@ router.post("/", (request, response) => {
     .then(chestionar => create_new_session(chestionar))
     .then(session => session.toObject())
     .then(session => {
+      session.now = new Date();
       let res = {
         session,
         token: jsonwebtoken.sign(session._id.toString(), config.secret)
