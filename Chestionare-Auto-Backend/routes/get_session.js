@@ -6,7 +6,6 @@ const Session = require("../models/Session");
 router.post("/", (request, response) => {
   verify_token(request.body.token)
     .then(id => Session.findById(id).exec())
-    .then(session => verify_if_session_exists(session))
     .then(session => verify_if_session_expired(session))
     .then(res => response.json(res))
     .catch(error => handleError(error, response));
@@ -21,29 +20,25 @@ function verify_token(token) {
   });
 }
 
-function verify_if_session_exists(session) {
+function verify_if_session_expired(session) {
   if (session === null)
     return Promise.reject(new Error("session does not exist"));
-  else return Promise.resolve(session);
-}
-
-function verify_if_session_expired(session) {
-  let status;
   let now = new Date();
-  if (now.getTime() >= new Date(session.expiration_date).getTime()) {
-    if (session.wrong_answers < 5 && session.correct_answers >= 22)
-      status = "passed";
-    else status = "failed";
-    return session.remove().then(Promise.resolve({ status }));
-  } else {
-    if (session.wrong_answers >= 5) status = "failed";
-    else if (session.correct_answers >= 22) status = "passed";
-    if (status) return session.remove().then(Promise.resolve({ status }));
-    session = session.toObject();
+  if (now.getTime() > created_at.getTime() + 1800000) {
+    if (session.correct_answers > 21)
+      return Promise.resolve({ status: "passed" });
+    return Promise.resolve({ status: "failed" });
+  }
+  return new Promise(resolve => {
+    if (session.correct_answers > 21)
+      return session.remove().then(resolve({ status: "passed" }));
+    if (session.wrong_answers > 4)
+      return session.remove().then(resolve({ status: "failed" }));
+    session.toObject();
     session.now = now;
     delete session["_id"];
-    return Promise.resolve({ session });
-  }
+    return resolve({ session });
+  });
 }
 
 function handleError(error, response) {
@@ -69,5 +64,5 @@ function handleError(error, response) {
       response_code = 500;
       console.log(error);
   }
-  response.status(response_status).json({ error_message });
+  response.status(response_status).json(error_message);
 }
