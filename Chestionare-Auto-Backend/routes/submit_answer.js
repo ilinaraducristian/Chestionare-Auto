@@ -9,7 +9,7 @@ router.post("/", (request, response) => {
     .then(id => Session.findById(id).exec())
     .then(session => verify_if_session_expired(session))
     .then(result => verify_if_given_answers_are_correct(result, request.body))
-    .then(res => response.json(res))
+    .then(status => response.json({ status }))
     .catch(error => handle_error(error, response));
 });
 
@@ -36,8 +36,7 @@ function verify_if_session_expired(session) {
   if (session === null)
     return Promise.reject(new Error("session does not exist"));
   let created_at = new Date(session.created_at);
-  let now = new Date();
-  if (now.getTime() > created_at.getTime() + 1800000) {
+  if (new Date().getTime() > created_at.getTime() + 1800000) {
     if (session.correct_answers > 21)
       return Promise.resolve({ status: "passed", session });
     return Promise.resolve({ status: "failed", session });
