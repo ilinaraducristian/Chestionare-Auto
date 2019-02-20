@@ -10,8 +10,8 @@ import { Session } from "src/app/interfaces/session";
 })
 export class SessionComponent implements OnInit {
   private session: Session;
-  private time_manager: NodeJS.Timer;
-  private remaining_time: Date;
+  private time_manager: any; // NodeJS.Timer
+  private remaining_time: Date = new Date(1800000);
   private answers: Array<boolean> = [false, false, false];
 
   constructor(
