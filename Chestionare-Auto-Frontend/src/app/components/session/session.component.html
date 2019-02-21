@@ -1,27 +1,29 @@
 <div *ngIf="this.session" class="container-fluid">
   <div class="row justify-content-center">
-    <span class="badge badge-pill badge-warning"
-      >Timp ramas:
-      {{ this.remaining_time.toTimeString().substring(3, 8) }}</span
-    >
-    <span class="badge badge-pill badge-info"
-      >Intrebari ramase:
-      {{ 26 - this.session.correct_answers - this.session.wrong_answers }}</span
-    >
-    <span class="badge badge-pill badge-success"
-      >Raspunsuri corecte: {{ this.session.correct_answers }}</span
-    >
-    <span class="badge badge-pill badge-danger"
-      >Raspunsuri gresite: {{ this.session.wrong_answers }}</span
-    >
+    <span class="badge badge-pill badge-warning col-5 col-sm-4 col-md-2">
+      Timp ramas:
+      {{ this.remaining_time.toTimeString().substring(3, 8) }}
+    </span>
+    <span class="badge badge-pill badge-info col-5 col-sm-4 col-md-2">
+      Intrebari ramase:
+      {{ 26 - this.session.correct_answers - this.session.wrong_answers }}
+    </span>
+    <span class="badge badge-pill badge-success col-5 col-sm-4 col-md-2">
+      Raspunsuri corecte: {{ this.session.correct_answers }}
+    </span>
+    <span class="badge badge-pill badge-danger col-5 col-sm-4 col-md-2">
+      Raspunsuri gresite: {{ this.session.wrong_answers }}
+    </span>
   </div>
-  <div class="row justify-content-center">
-    <h5>
+  <div class="row">
+    <h5 class="col-12 question">
       {{ this.session.questions[0].question }}
     </h5>
   </div>
 
-  <div class="list-group row col-8 offset-2">
+  <div
+    class="list-group col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 offset-sm-1 offset-md-2 offset-lg-3 offset-xl-4"
+  >
     <a
       *ngFor="let answer of this.session.questions[0].answers; let i = index"
       class="list-group-item list-group-item-action"
@@ -31,5 +33,9 @@
     >
       {{ answer }}
     </a>
+  </div>
+  <div class="row justify-content-center">
+    <button type="button" class="btn btn-success">Trimite raspunsul</button>
+    <button type="button" class="btn btn-warning">Urmatoarea intrebare</button>
   </div>
 </div>

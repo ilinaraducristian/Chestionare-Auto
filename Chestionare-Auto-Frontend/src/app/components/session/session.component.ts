@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
 import { Session } from "src/app/interfaces/session";
+import { log } from "util";
 
 @Component({
   selector: "app-session",
@@ -28,14 +29,13 @@ export class SessionComponent implements OnInit {
     this.session = session;
     // expiration_date = created_at + 30 minutes
     // remaining_time = expiration_date - now
-    console.log(session.created_at);
-    console.log(session.now);
-    console.log(
-      Date.parse(session.created_at) + 1800000 - Date.parse(session.now)
-    );
-    this.remaining_time = new Date(
-      Date.parse(session.created_at) + 1800000 - Date.parse(session.now)
-    );
+    if (session.now.toString() === "Invalid Date") {
+      this.remaining_time.setTime(session.created_at.getTime() + 1800000);
+    } else {
+      this.remaining_time.setTime(
+        session.created_at.getTime() + 1800000 - session.now.getTime()
+      );
+    }
 
     this.time_manager = setInterval(() => {
       this.remaining_time.setTime(this.remaining_time.getTime() - 1000);
@@ -53,7 +53,10 @@ export class SessionComponent implements OnInit {
       }
       this.session_service.get_session(token).subscribe(
         response => {
-          this.set_session(response["session"]);
+          let session = response["session"];
+          session.now = new Date(session.now);
+          session.created_at = new Date(session.created_at);
+          this.set_session(session);
         },
         error => {
           localStorage.removeItem("token");
@@ -63,7 +66,11 @@ export class SessionComponent implements OnInit {
     } else {
       this.session_service.new_session().subscribe(
         response => {
-          this.set_session(response["session"]);
+          let session = response["session"];
+
+          session.now = new Date(session.now);
+          session.created_at = new Date(session.created_at);
+          this.set_session(session);
           localStorage.setItem("token", response["token"]);
         },
         error => {

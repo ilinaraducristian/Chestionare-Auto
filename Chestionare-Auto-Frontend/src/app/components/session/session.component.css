@@ -5,4 +5,22 @@
 .badge {
   margin-left: 1em;
   margin-right: 1em;
+  margin-top: 0.2em;
+  min-width: 12em;
+}
+
+.question {
+  text-align: center;
+}
+
+button {
+  margin-right: 1em;
+  margin-left: 1em;
+}
+
+@media only screen and (max-width: 576px) {
+  button {
+    margin-right: 0.2em;
+    margin-left: 0.2em;
+  }
 }
