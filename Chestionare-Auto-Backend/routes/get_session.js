@@ -24,7 +24,7 @@ function verify_if_session_expired(session) {
   if (session === null)
     return Promise.reject(new Error("session does not exist"));
   let now = new Date();
-  if (now.getTime() > created_at.getTime() + 1800000) {
+  if (now.getTime() > session.created_at.getTime() + 1800000) {
     if (session.correct_answers > 21)
       return Promise.resolve({ status: "passed" });
     return Promise.resolve({ status: "failed" });
@@ -34,7 +34,7 @@ function verify_if_session_expired(session) {
       return session.remove().then(resolve({ status: "passed" }));
     if (session.wrong_answers > 4)
       return session.remove().then(resolve({ status: "failed" }));
-    session.toObject();
+    session = session.toObject();
     session.now = now;
     delete session["_id"];
     return resolve({ session });
