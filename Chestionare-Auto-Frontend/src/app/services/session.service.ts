@@ -34,6 +34,18 @@ export class SessionService {
     );
   }
 
+  send_answers(
+    token: String,
+    index: Number,
+    answers: [String]
+  ): Observable<Object> {
+    return this.http.post<Session>(
+      environment.backend + "submit_answer",
+      { token, question_index: index, answers },
+      { headers: this.headers }
+    );
+  }
+
   set_category(category: String) {
     this.category = category;
   }

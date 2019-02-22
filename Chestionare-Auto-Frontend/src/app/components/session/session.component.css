@@ -3,10 +3,11 @@
 }
 
 .badge {
-  margin-left: 1em;
-  margin-right: 1em;
+  margin-left: 0.6em;
+  margin-right: 0.6em;
   margin-top: 0.2em;
   min-width: 12em;
+  font-size: 0.9em;
 }
 
 .question {
@@ -16,6 +17,7 @@
 button {
   margin-right: 1em;
   margin-left: 1em;
+  margin-top: 1em;
 }
 
 @media only screen and (max-width: 576px) {
