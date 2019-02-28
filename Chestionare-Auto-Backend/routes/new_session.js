@@ -3,17 +3,19 @@ const config = require("../config");
 const jsonwebtoken = require("jsonwebtoken");
 const Session = require("../models/Session");
 const mongoose = require("mongoose");
-const question_schema = require("../schemas/question_schema");
+const chestionar_schema = require("../schemas/chestionar");
 
-router.post("/", (request, response) => {
+router.post("/", handleRequest);
+
+function handleRequest(request, response) {
   verify_input(request.body.category)
-    .then(category => create_new_chestionar(category))
-    .then(chestionar => verify_if_chestionar_exists(chestionar))
-    .then(chestionar => create_new_session(chestionar))
-    .then(session => prepare_response(session.toObject()))
-    .then(res => response.json(res))
-    .catch(error => handleError(error, response));
-});
+    .then(get_chestionare)
+    .then(verify_if_chestionare_exists)
+    .then(create_new_session)
+    .then(prepare_response)
+    .catch(handleError)
+    .then(response.json);
+}
 
 function verify_input(category) {
   if (category === undefined)
@@ -24,23 +26,23 @@ function verify_input(category) {
   return Promise.resolve(category);
 }
 
-function create_new_chestionar(category) {
+function get_chestionare(category) {
   return mongoose
-    .model(category, question_schema, category)
+    .model(category, chestionar_schema, category)
     .aggregate([{ $sample: { size: 26 } }, { $project: { _id: 0 } }])
     .exec();
 }
 
-function verify_if_chestionar_exists(chestionar) {
-  if (chestionar === null)
+function verify_if_chestionare_exists(chestionare) {
+  if (chestionare === null)
     return Promise.reject(new Error("cannot get a new chestionar"));
-  return Promise.resolve(chestionar);
+  return Promise.resolve(chestionare);
 }
 
-function create_new_session(chestionar) {
+function create_new_session(chestionare) {
   let new_session = {
     created_at: new Date(),
-    questions: chestionar,
+    chestionare: chestionare,
     correct_answers: 0,
     wrong_answers: 0
   };
@@ -48,9 +50,10 @@ function create_new_session(chestionar) {
 }
 
 function prepare_response(session) {
-  session.questions.map(question => {
-    delete question.correct_answers;
-    return question;
+  session = session.toObject();
+  session.chestionare.map(chestionar => {
+    delete chestionar.correct_answers;
+    return chestionar;
   });
   let response = {
     session,

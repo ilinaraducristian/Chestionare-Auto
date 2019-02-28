@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 module.exports = new mongoose.Schema(
   {
     question: String,
-    image: String,
     answers: [String],
+    image: String,
     correct_answers: String
   },
   {
