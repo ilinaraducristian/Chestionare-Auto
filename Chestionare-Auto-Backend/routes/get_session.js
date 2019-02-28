@@ -3,13 +3,15 @@ const jsonwebtoken = require("jsonwebtoken");
 const config = require("../config");
 const Session = require("../models/Session");
 
-router.post("/", (request, response) => {
+router.post("/", handleRequest);
+
+function handleRequest(request, response) {
   verify_token(request.body.token)
     .then(id => Session.findById(id).exec())
-    .then(session => verify_if_session_expired(session))
-    .then(res => response.json(res))
-    .catch(error => handleError(error, response));
-});
+    .then(verify_if_session_expired)
+    .catch(handleError)
+    .then(response.json);
+}
 
 function verify_token(token) {
   return new Promise((resolve, reject) => {
@@ -64,5 +66,6 @@ function handleError(error, response) {
       response_code = 500;
       console.log(error);
   }
-  response.status(response_status).json(error_message);
+  // response.status(response_status).json(error_message);
+  return error_message;
 }

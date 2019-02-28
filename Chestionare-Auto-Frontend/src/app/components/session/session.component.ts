@@ -85,6 +85,7 @@ export class SessionComponent implements OnInit {
   }
 
   ngOnInit() {
+    // get session
     if (this.session_service.get_category() == null) {
       let token = localStorage.getItem("token");
       if (token == null) {
@@ -103,17 +104,20 @@ export class SessionComponent implements OnInit {
           this.router.navigate([""]);
         }
       );
+      // new session
     } else {
+      console.log("new_session");
       this.session_service.new_session().subscribe(
         response => {
           let session = response["session"];
-
+          console.log("session");
           session.now = new Date(session.now);
           session.created_at = new Date(session.created_at);
           this.set_session(session);
           localStorage.setItem("token", response["token"]);
         },
         error => {
+          console.log("error");
           this.router.navigate([""]);
         }
       );

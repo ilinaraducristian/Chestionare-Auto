@@ -13,8 +13,8 @@ function handleRequest(request, response) {
     .then(verify_if_chestionare_exists)
     .then(create_new_session)
     .then(prepare_response)
-    .catch(handleError)
-    .then(response.json);
+    .then(res => response.json(res))
+    .catch(error => handleError(error, response));
 }
 
 function verify_input(category) {
@@ -51,6 +51,7 @@ function create_new_session(chestionare) {
 
 function prepare_response(session) {
   session = session.toObject();
+  console.log(session);
   session.chestionare.map(chestionar => {
     delete chestionar.correct_answers;
     return chestionar;
