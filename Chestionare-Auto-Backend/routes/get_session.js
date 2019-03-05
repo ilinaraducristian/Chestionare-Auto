@@ -6,14 +6,14 @@ const Session = require("../models/Session");
 router.post("/", handleRequest);
 
 function handleRequest(request, response) {
-  verify_token(request.body.token)
+  verify_input(request.body.token)
     .then(id => Session.findById(id).exec())
     .then(verify_if_session_expired)
-    .catch(handleError)
-    .then(response.json);
+    .then(res => response.json(res))
+    .catch(handleError);
 }
 
-function verify_token(token) {
+function verify_input(token) {
   return new Promise((resolve, reject) => {
     jsonwebtoken.verify(token, config.secret, (error, id) => {
       if (error) reject(error);
@@ -26,21 +26,19 @@ function verify_if_session_expired(session) {
   if (session === null)
     return Promise.reject(new Error("session does not exist"));
   let now = new Date();
-  return new Promise(resolve => {
-    if (now.getTime() > session.created_at.getTime() + 1800000) {
-      if (session.correct_answers > 21)
-        return session.remove().then(resolve({ status: "passed" }));
-      return session.remove().then(resolve({ status: "failed" }));
-    }
+  if (now.getTime() > session.created_at.getTime() + 1800000) {
     if (session.correct_answers > 21)
-      return session.remove().then(resolve({ status: "passed" }));
-    if (session.wrong_answers > 4)
-      return session.remove().then(resolve({ status: "failed" }));
-    session = session.toObject();
-    session.now = now;
-    delete session["_id"];
-    return resolve({ session });
-  });
+      return session.remove().then(Promise.resolve({ status: "passed" }));
+    return session.remove().then(Promise.resolve({ status: "failed" }));
+  }
+  if (session.correct_answers > 21)
+    return session.remove().then(Promise.resolve({ status: "passed" }));
+  if (session.wrong_answers > 4)
+    return session.remove().then(Promise.resolve({ status: "failed" }));
+  session = session.toObject();
+  session.now = now;
+  delete session["_id"];
+  return Promise.resolve({ session });
 }
 
 function handleError(error, response) {
@@ -66,6 +64,6 @@ function handleError(error, response) {
       response_code = 500;
       console.log(error);
   }
-  // response.status(response_status).json(error_message);
-  return error_message;
+  response.status(response_status).json(error_message);
+  // return error_message;
 }

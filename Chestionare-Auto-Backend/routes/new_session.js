@@ -10,16 +10,15 @@ router.post("/", handleRequest);
 function handleRequest(request, response) {
   verify_input(request.body.category)
     .then(get_chestionare)
-    .then(verify_if_chestionare_exists)
     .then(create_new_session)
-    .then(prepare_response)
+    .then(session => prepare_response(session.toObject()))
     .then(res => response.json(res))
     .catch(error => handleError(error, response));
 }
 
 function verify_input(category) {
-  if (category === undefined)
-    return Promise.reject(new Error("category is missing"));
+  if (category === undefined || category === null)
+    return Promise.reject(new Error({ stats: "asd" }));
   let categories = ["categoria_a", "categoria_b", "categoria_c", "categoria_d"];
   if (categories.findIndex(cat => cat === category) === -1)
     return Promise.reject(new Error("wrong category"));
@@ -33,13 +32,9 @@ function get_chestionare(category) {
     .exec();
 }
 
-function verify_if_chestionare_exists(chestionare) {
+function create_new_session(chestionare) {
   if (chestionare === null)
     return Promise.reject(new Error("cannot get a new chestionar"));
-  return Promise.resolve(chestionare);
-}
-
-function create_new_session(chestionare) {
   let new_session = {
     created_at: new Date(),
     chestionare: chestionare,
@@ -50,18 +45,16 @@ function create_new_session(chestionare) {
 }
 
 function prepare_response(session) {
-  session = session.toObject();
-  console.log(session);
+  let token = jsonwebtoken.sign(session._id.toString(), config.secret);
+  delete response.session._id;
   session.chestionare.map(chestionar => {
     delete chestionar.correct_answers;
     return chestionar;
   });
-  let response = {
+  return {
     session,
-    token: jsonwebtoken.sign(session._id.toString(), config.secret)
+    token
   };
-  delete response.session._id;
-  return response;
 }
 
 function handleError(error, response) {

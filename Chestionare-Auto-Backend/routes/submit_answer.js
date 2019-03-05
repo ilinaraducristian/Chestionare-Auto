@@ -3,78 +3,67 @@ const config = require("../config");
 const jsonwebtoken = require("jsonwebtoken");
 const Session = require("../models/Session");
 
-router.post("/", (request, response) => {
-  verify_input(request.body)
-    .then(token => verify_token(token))
-    .then(id => Session.findById(id).exec())
-    .then(session => verify_if_session_expired(session))
-    .then(result => verify_if_given_answers_are_correct(result, request.body))
-    .then(status => response.json({ status }))
-    .catch(error => handle_error(error, response));
-});
+router.post("/", handleRequest);
 
-function verify_input(request) {
-  if (request.question_index === undefined)
-    return Promise.reject(new Error("question_index is missing"));
-  if (request.answers === undefined)
-    return Promise.reject(new Error("answers is missing"));
-  if (request.token === undefined)
-    return Promise.reject(new Error("token is missing"));
-  return Promise.resolve(request.token);
+function handleRequest(request, response) {
+  verify_input(request)
+    .then(id => Session.findById(id).exec())
+    .then(result => verify_if_given_answers_are_correct(result, request.body))
+    .then(verify_if_session_expired)
+    .then(res => response.json(res))
+    .catch(error => handleError(error, response));
 }
 
-function verify_token(token) {
+function verify_input(request) {
+  if (request.body.question_index === undefined)
+    return Promise.reject(new Error("question_index is missing"));
+  if (request.body.answers === undefined)
+    return Promise.reject(new Error("answers is missing"));
+  if (request.body.token === undefined)
+    return Promise.reject(new Error("token is missing"));
   return new Promise((resolve, reject) => {
-    jsonwebtoken.verify(token, config.secret, (error, id) => {
+    jsonwebtoken.verify(request.body.token, config.secret, (error, id) => {
       if (error) reject(error);
       else resolve(id);
     });
   });
 }
 
-function verify_if_session_expired(session) {
+function verify_if_given_answers_are_correct(session, request) {
   if (session === null)
     return Promise.reject(new Error("session does not exist"));
-  let created_at = new Date(session.created_at);
-  if (new Date().getTime() > created_at.getTime() + 1800000) {
-    if (session.correct_answers > 21)
-      return Promise.resolve({ status: "passed", session });
-    return Promise.resolve({ status: "failed", session });
-  }
 
-  return Promise.resolve({ status: null, session });
+  let question = session.chestionare[request.question_index];
+
+  if (!question) return Promise.reject(new Error("question does not exist"));
+
+  let status = request.answers === question.correct_answers;
+  if (status) {
+    session.questions.splice(request.question_index, 1);
+    session.save().then(Promise.resolve("correct"));
+  } else {
+    session.wrong_answers++;
+    if (session.wrong_answers > 4)
+      return session.remove().then(Promise.resolve("failed"));
+
+    session.questions.splice(request.question_index, 1);
+    session.save().then(Promise.resolve("wrong"));
+  }
+  return { status, session };
 }
 
-function verify_if_given_answers_are_correct({ status, session }, request) {
-  if (status === "passed" || status === "failed") {
-    return session.remove().then(Promise.resolve(status));
-  }
-  let question = session.questions[request.question_index];
+function verify_if_session_expired({ status, session }) {
+  if (status) return session.remove().then(Promise.resolve({ status }));
+  let now = new Date();
+  let status = "failed";
+  if (session.correct_answers > 21) status = "passed";
 
-  if (question === null || question === undefined)
-    return Promise.reject(new Error("question does not exist"));
+  if (now.getTime() < session.created_at.getTime() + 1800000) status = null;
 
-  status = request.answers === question.correct_answers;
-  return new Promise(resolve => {
-    if (status) {
-      session.correct_answers++;
-      if (session.correct_answers > 21)
-        return session.remove().then(resolve("passed"));
-
-      session.questions.splice(request.question_index, 1);
-      session.save().then(resolve("correct"));
-    } else {
-      session.wrong_answers++;
-      if (session.wrong_answers > 4)
-        return session.remove().then(resolve("failed"));
-
-      session.questions.splice(request.question_index, 1);
-      session.save().then(resolve("wrong"));
-    }
-  });
+  return Promise.resolve({ status, session });
 }
 
-function handle_error(error, response) {
+function handleError(error, response) {
   let response_status = 400;
   let error_message;
   switch (error.message) {
