@@ -9,8 +9,7 @@ function handleRequest(request, response) {
   verify_input(request)
     .then(id => Session.findById(id).exec())
     .then(result => verify_if_given_answers_are_correct(result, request.body))
-    .then(verify_if_session_expired)
-    .then(res => response.json(res))
+    .then(status => response.json({ status }))
     .catch(error => handleError(error, response));
 }
 
@@ -38,29 +37,28 @@ function verify_if_given_answers_are_correct(session, request) {
   if (!question) return Promise.reject(new Error("question does not exist"));
 
   let status = request.answers === question.correct_answers;
+  session.questions.splice(request.question_index, 1);
   if (status) {
-    session.questions.splice(request.question_index, 1);
-    session.save().then(Promise.resolve("correct"));
+    session.correct_answers++;
   } else {
     session.wrong_answers++;
-    if (session.wrong_answers > 4)
-      return session.remove().then(Promise.resolve("failed"));
-
-    session.questions.splice(request.question_index, 1);
-    session.save().then(Promise.resolve("wrong"));
   }
-  return { status, session };
-}
-
-function verify_if_session_expired({ status, session }) {
-  if (status) return session.remove().then(Promise.resolve({ status }));
   let now = new Date();
-  let status = "failed";
-  if (session.correct_answers > 21) status = "passed";
-
-  if (now.getTime() < session.created_at.getTime() + 1800000) status = null;
-
-  return Promise.resolve({ status, session });
+  if (now.getTime() < session.created_at.getTime() + 1800000) {
+    if (session.correct_answers >= 22)
+      return session.remove().then(Promise.resolve("correct"));
+    return session.remove().then(Promise.resolve("failed"));
+  }
+  if (session.correct_answers + session.wrong_answers >= 26) {
+    if (session.correct_answers >= 22)
+      return session.remove().then(Promise.resolve("correct"));
+    return session.remove().then(Promise.resolve("failed"));
+  }
+  if (status) {
+    return session.save().then(Promise.resolve("correct"));
+  } else {
+    return session.save().then(Promise.resolve("failed"));
+  }
 }
 
 function handleError(error, response) {
