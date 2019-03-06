@@ -1,10 +1,5 @@
 version: "3.7"
 services:
-  database:
-    build: ./Chestionare-Auto-Database
-    ports:
-      - 27017:27017
-
   backend:
     build: ./Chestionare-Auto-Backend
     ports:

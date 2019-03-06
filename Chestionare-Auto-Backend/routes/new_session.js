@@ -46,7 +46,7 @@ function create_new_session(chestionare) {
 
 function prepare_response(session) {
   let token = jsonwebtoken.sign(session._id.toString(), config.secret);
-  delete response.session._id;
+  delete session._id;
   session.chestionare.map(chestionar => {
     delete chestionar.correct_answers;
     return chestionar;

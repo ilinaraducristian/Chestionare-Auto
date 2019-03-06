@@ -6,12 +6,9 @@ const cors = require("cors");
 
 const db = require("./config").mongoURI;
 
-mongoose
-  .connect(db, {
-    useNewUrlParser: true
-  })
-  .then(() => console.log("Connected to database!"))
-  .catch(error => console.log(error));
+mongoose.connect(db, {
+  useNewUrlParser: true
+});
 
 const app = express();
 
@@ -25,4 +22,4 @@ app.use((req, res) => {
   res.sendStatus(404);
 });
 
-app.listen(config.port, () => console.log("Server started!"));
+app.listen(config.port);
