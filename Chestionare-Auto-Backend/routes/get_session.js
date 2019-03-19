@@ -10,7 +10,7 @@ function handleRequest(request, response) {
     .then(id => Session.findById(id).exec())
     .then(verify_if_session_expired)
     .then(res => response.json(res))
-    .catch(handleError);
+    .catch(error => handleError(error, response));
 }
 
 function verify_input(token) {
@@ -25,6 +25,8 @@ function verify_input(token) {
 function verify_if_session_expired(session) {
   if (session === null)
     return Promise.reject(new Error("session does not exist"));
+  console.log(session);
+
   let now = new Date();
   if (now.getTime() > session.created_at.getTime() + 1800000) {
     if (session.correct_answers > 21)
@@ -64,6 +66,6 @@ function handleError(error, response) {
       response_code = 500;
       console.log(error);
   }
-  response.status(response_status).json(error_message);
+  response.json({ error_message });
   // return error_message;
 }

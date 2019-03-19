@@ -4,8 +4,8 @@ services:
     build: ./Chestionare-Auto-Backend
     ports:
       - 8888:8888
-    depends_on:
-      - database
+    # depends_on:
+    #   - database
     volumes:
       - ./Chestionare-Auto-Backend:/usr/src/
 

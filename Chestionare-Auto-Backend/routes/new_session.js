@@ -71,5 +71,5 @@ function handleError(error, response) {
       response_code = 500;
       console.log(error);
   }
-  response.status(response_status).json({ error_message });
+  response.json({ error_message });
 }

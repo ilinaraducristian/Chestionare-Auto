@@ -46,12 +46,12 @@ function verify_if_given_answers_are_correct(session, request) {
   let now = new Date();
   if (now.getTime() < session.created_at.getTime() + 1800000) {
     if (session.correct_answers >= 22)
-      return session.remove().then(Promise.resolve("correct"));
+      return session.remove().then(Promise.resolve("passed"));
     return session.remove().then(Promise.resolve("failed"));
   }
   if (session.correct_answers + session.wrong_answers >= 26) {
     if (session.correct_answers >= 22)
-      return session.remove().then(Promise.resolve("correct"));
+      return session.remove().then(Promise.resolve("passed"));
     return session.remove().then(Promise.resolve("failed"));
   }
   if (status) {

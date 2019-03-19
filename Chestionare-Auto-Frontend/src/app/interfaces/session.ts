@@ -1,9 +1,9 @@
-import { Question } from "./question";
+import { Chestionar } from "./chestionar";
 
 export interface Session {
   now: Date;
   created_at: Date;
-  questions: [Question];
+  chestionare: [Chestionar];
   correct_answers: Number;
   wrong_answers: Number;
 }
