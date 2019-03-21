@@ -7,8 +7,8 @@ router.post("/", handleRequest);
 
 function handleRequest(request, response) {
   verify_input(request.body.token)
-    .then(id => Session.findById(id).exec())
-    .then(verify_if_session_expired)
+    .then(id => Session.get_session(id))
+    .then(session => verify_if_session_expired(session))
     .then(res => response.json(res))
     .catch(error => handleError(error, response));
 }

@@ -9,6 +9,10 @@ function handleRequest(request, response) {
   verify_input(request)
     .then(id => Session.findById(id).exec())
     .then(result => verify_if_given_answers_are_correct(result, request.body))
+    .then(asd => {
+      console.log(asd);
+      return asd;
+    })
     .then(status => response.json({ status }))
     .catch(error => handleError(error, response));
 }
@@ -32,12 +36,12 @@ function verify_if_given_answers_are_correct(session, request) {
   if (session === null)
     return Promise.reject(new Error("session does not exist"));
 
-  let question = session.chestionare[request.question_index];
+  let chestionar = session.chestionare[request.question_index];
 
-  if (!question) return Promise.reject(new Error("question does not exist"));
+  if (!chestionar) return Promise.reject(new Error("question does not exist"));
 
-  let status = request.answers === question.correct_answers;
-  session.questions.splice(request.question_index, 1);
+  let status = request.answers === chestionar.correct_answers;
+  session.chestionare.splice(request.question_index, 1);
   if (status) {
     session.correct_answers++;
   } else {
@@ -51,13 +55,16 @@ function verify_if_given_answers_are_correct(session, request) {
   }
   if (session.correct_answers + session.wrong_answers >= 26) {
     if (session.correct_answers >= 22)
-      return session.remove().then(Promise.resolve("passed"));
+      return session
+        .remove()
+        .exec()
+        .then(Promise.resolve("passed"));
     return session.remove().then(Promise.resolve("failed"));
   }
   if (status) {
     return session.save().then(Promise.resolve("correct"));
   } else {
-    return session.save().then(Promise.resolve("failed"));
+    return session.save().then(Promise.resolve("wrong"));
   }
 }
 
