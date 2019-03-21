@@ -4,6 +4,6 @@ export interface Session {
   now: Date;
   created_at: Date;
   chestionare: [Chestionar];
-  correct_answers: Number;
-  wrong_answers: Number;
+  correct_answers: number;
+  wrong_answers: number;
 }

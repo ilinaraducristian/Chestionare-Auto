@@ -37,7 +37,7 @@ export class SessionService {
   send_answers(
     token: String,
     index: Number,
-    answers: [String]
+    answers: String
   ): Observable<Object> {
     return this.http.post<Session>(
       environment.backend + "submit_answer",

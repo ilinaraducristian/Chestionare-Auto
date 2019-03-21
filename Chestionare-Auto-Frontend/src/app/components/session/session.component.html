@@ -17,7 +17,7 @@
   </div>
   <div class="row">
     <h5 class="col-12 question">
-      {{ this.current_chestionar.question }}
+      {{ this.session.chestionare[this.chestionar_index].question }}
     </h5>
   </div>
 
@@ -25,7 +25,10 @@
     class="list-group col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 offset-sm-1 offset-md-2 offset-lg-3 offset-xl-4"
   >
     <a
-      *ngFor="let answer of this.current_chestionar.answers; let i = index"
+      *ngFor="
+        let answer of this.session.chestionare[this.chestionar_index].answers;
+        let i = index
+      "
       class="list-group-item list-group-item-action"
       href="#"
       [ngClass]="{ active: this.answers[i] }"
