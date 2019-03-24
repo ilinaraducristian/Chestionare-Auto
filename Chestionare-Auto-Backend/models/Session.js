@@ -4,47 +4,81 @@ const chestionar_schema = require("../schemas/chestionar");
 let Session = mongoose.model("Session", session_schema);
 
 module.exports = {
+  /**
+   * @param  {string} category
+   * @returns {Promise<Object>} mongose save promise
+   */
   new: function(category) {
     return mongoose
       .model(category, chestionar_schema, category)
       .aggregate([{ $sample: { size: 26 } }, { $project: { _id: 0 } }])
       .exec()
       .then(chestionare => {
-        if (!chestionare)
-          return Promise.reject(new Error("cannot get chestionare"));
-        return new Session({
-          created_at: new Date(),
-          chestionare,
-          correct_answers: 0,
-          wrong_answers: 0
-        }).save();
+        return new Promise((resolve, reject) => {
+          if (!chestionare) return reject(new Error("cannot get chestionare"));
+          new Session({
+            created_at: new Date(),
+            chestionare,
+            correct_answers: 0,
+            wrong_answers: 0
+          }).save((err, session) => {
+            if (err || !session) return reject(new Error("cannot get session"));
+            resolve(session);
+          });
+        });
       });
   },
+  /**
+   * @param  {string} id ObjectID stored in DB
+   * @returns {Promise<Object>} mongose returne_object promise
+   */
   get: function(id) {
-    let return_object = { status: "ok" };
-    Session.findById(id)
+    return Session.findById(id)
       .exec()
       .then(session => {
-        if (!session) return Promise.reject("cannot get session");
-        let now = new Date();
-        if (now.getTime() > session.created_at.getTime() + 1800000) {
-          // if time expired
-          if (session.correct_answers > 21) {
-            return_object.ok = "passed";
+        return new Promise((resolve, reject) => {
+          if (!session) return reject(new Error("cannot get session"));
+          let now = new Date();
+          let return_object = { session };
+          if (now.getTime() > session.created_at.getTime() + 1800000) {
+            // if time expired
+            if (session.correct_answers > 21) {
+              return_object.status = "passed";
+            } else {
+              return_object.status = "failed";
+            }
           } else {
-            return_object.ok = "failed";
+            // if not
+            if (session.wrong_answers > 4) {
+              return_object.status = "failed";
+            } else if (session.correct_answers + session.wrong_answers > 25) {
+              return_object.status = "passed";
+            } else {
+              return_object.status = "ok";
+            }
           }
-        } else {
-          // if not
-          if (session.wrong_answers > 4) {
-            return_object.ok = "failed";
-          } else if (session.correct_answers + session.wrong_answers > 25) {
-            return_object.ok = "passed";
-          } else {
-            return_object.session = session;
-          }
-        }
-        return Promise.resolve(return_object);
+          resolve(return_object);
+        });
       });
+  },
+  /**
+   * @param  {string} id ObjectID stored in DB
+   * @param  {[string]} answers Answers submitted by the user
+   * @returns {Promise<string>} return_object
+   */
+  validate_answers: function(id, request) {
+    return this.get(id).then(
+      return_object =>
+        new Promise((resolve, reject) => {
+          if (return_object.status != "ok") return resolve(return_object);
+          let chestionar =
+            return_object.session.chestionare[request.body.question_index];
+          if (!chestionar) return reject(new Error("chestionar not found"));
+          if (request.body.answers == chestionar.correct_answers)
+            return_object.status = "correct";
+          else return_object.status = "wrong";
+          resolve(return_object);
+        })
+    );
   }
 };
