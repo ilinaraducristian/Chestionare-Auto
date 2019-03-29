@@ -2,7 +2,6 @@ import { Component, OnInit } from "@angular/core";
 import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
 import { Session } from "src/app/interfaces/session";
-import { Chestionar } from "src/app/interfaces/chestionar";
 
 @Component({
   selector: "app-session",
@@ -22,38 +21,120 @@ export class SessionComponent implements OnInit {
     private session_service: SessionService
   ) {}
 
+  /**
+   * call clearInterval() to stop the timer
+   */
+  startTimer() {
+    this.time_manager = setInterval(_ => {
+      this.remaining_time.setTime(this.remaining_time.getTime() - 1000);
+      if (this.remaining_time.getTime() - 1000 <= 0) {
+        clearInterval(this.time_manager);
+        this.verify_session_and_close();
+      }
+    }, 1000);
+  }
+
+  verify_session_and_close() {
+    if (this.session.correct_answers > 21) {
+      console.log("passed");
+      clearInterval(this.time_manager);
+    } else {
+      console.log("failed");
+      clearInterval(this.time_manager);
+    }
+  }
+
+  verify_session() {
+    if (this.session.wrong_answers > 4) {
+      console.log("failed");
+      clearInterval(this.time_manager);
+    } else if (this.session.wrong_answers + this.session.correct_answers > 25) {
+      console.log("passed");
+      clearInterval(this.time_manager);
+    }
+  }
+
+  *generator() {
+    while (this.session.chestionare.length > 0) {
+      if (this.chestionar_index == this.session.chestionare.length)
+        this.chestionar_index = 0;
+      else this.chestionar_index++;
+      yield;
+    }
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.time_manager);
+  }
+
   ngOnInit() {
     if (this.session_service.get_category() == null) {
       // get session
       let token = localStorage.getItem("token");
       if (token == null) return this.router.navigate([""]);
-      this.session_service
-        .get_session(token)
-        .subscribe(
-          response => this.parse_response(response),
-          error => this.parse_response(error)
-        );
+      this.session_service.get_session(token).subscribe(
+        response => {
+          if (response["error"]) {
+            console.log(response["error"]);
+            return;
+          }
+          if (response["status"]) {
+            switch (response["status"]) {
+              case "passed":
+                console.log("passed");
+                clearInterval(this.time_manager);
+                break;
+              case "failed":
+                console.log("failed");
+                clearInterval(this.time_manager);
+                break;
+              default:
+                this.session = response["session"];
+                this.remaining_time.setTime(
+                  response["now"] - Date.parse(this.session.created_at)
+                );
+                this.startTimer();
+                this.chestionar_generator = this.generator();
+            }
+          }
+        },
+        error => this.parse_error(error)
+      );
     } else {
       // new session
-      this.session_service
-        .new_session()
-        .subscribe(
-          response => this.parse_response(response),
-          error => this.parse_response(error)
-        );
+      this.session_service.new_session().subscribe(
+        response => {
+          if (response["error"]) {
+            console.log(response["error"]);
+            return;
+          }
+          if (response["session"]) {
+            this.session = response["session"];
+            localStorage.setItem("token", response["token"]);
+            this.remaining_time.setTime(1800000);
+            this.startTimer();
+            this.chestionar_generator = this.generator();
+          }
+        },
+        error => this.parse_error(error)
+      );
     }
   }
 
-  select_answer(i: number) {
+  select_answer(i: number): boolean {
     this.answers[i] = !this.answers[i];
     return false;
   }
 
   send_answer() {
+    // boolean to String
     let answers =
       (this.answers[0] ? "A" : "") +
       (this.answers[1] ? "B" : "") +
-      (this.answers[2] ? "C" : ""); // boolean to String
+      (this.answers[2] ? "C" : "");
+
+    // remove answered chestionar
+    this.session.chestionare.splice(this.chestionar_index, 1);
 
     this.session_service
       .send_answers(
@@ -63,26 +144,33 @@ export class SessionComponent implements OnInit {
       )
       .subscribe(
         response => {
-          console.log(response);
-
-          if (response["status"] == "correct") {
-            console.log("afiseaza correct");
-            this.session.correct_answers++;
-            this.session.chestionare.splice(this.chestionar_index, 1);
-            this.chestionar_generator.next();
-          } else if (response["status"] == "wrong") {
-            console.log("afiseaza wrong");
-            this.session.wrong_answers++;
-            this.session.chestionare.splice(this.chestionar_index, 1);
-            this.chestionar_generator.next();
-          } else {
+          if (response["error"]) {
+            console.log(response["status"]);
+            return;
+          }
+          switch (response["status"]) {
+            case "correct":
+              this.session.correct_answers++;
+              this.next_chestionar();
+              this.verify_session();
+              break;
+            case "wrong":
+              this.session.wrong_answers++;
+              this.next_chestionar();
+              this.verify_session();
+              break;
+            case "passed":
+              console.log("passed");
+              clearInterval(this.time_manager);
+              break;
+            case "failed":
+              console.log("failed");
+              clearInterval(this.time_manager);
+              break;
           }
         },
-        error => {
-          return this.router.navigate([""]);
-        }
+        error => this.parse_error(error)
       );
-    this.answers = [false, false, false];
   }
 
   next_chestionar() {
@@ -90,41 +178,8 @@ export class SessionComponent implements OnInit {
     this.answers = [false, false, false];
   }
 
-  parse_response(response) {
-    if (response["error_message"]) {
-      localStorage.removeItem("token");
-      return this.router.navigate([""]);
-    }
-
-    if (response["token"]) localStorage.setItem("token", response["token"]);
-
-    this.chestionar_generator = (function*() {
-      while (this.session.chestionare.length > 0) {
-        if (this.chestionar_index == this.session.chestionare.length)
-          this.chestionar_index = 0;
-        else this.chestionar_index++;
-      }
-    })();
-
-    let session = response["session"];
-
-    if (session.now) {
-      this.remaining_time.setTime(
-        Date.parse(session.created_at) + 1800000 - Date.parse(session.now)
-      );
-    } else {
-      this.remaining_time.setTime(Date.parse(session.created_at) + 1800000);
-    }
-
-    this.session = session;
-    this.time_manager = setInterval(() => {
-      this.remaining_time.setTime(this.remaining_time.getTime() - 1000);
-      if (this.remaining_time.getTime() - 1000 <= 0)
-        clearInterval(this.time_manager);
-    }, 1000);
-  }
-
   parse_error(error) {
+    console.log(error);
     localStorage.removeItem("token");
     this.router.navigate([""]);
   }

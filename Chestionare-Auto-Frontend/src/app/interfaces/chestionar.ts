@@ -1,5 +1,5 @@
 export interface Chestionar {
-  answers: [String];
-  question: String;
-  image: String;
+  answers: [string];
+  question: string;
+  image: string;
 }

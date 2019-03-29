@@ -9,17 +9,18 @@ function handleRequest(request, response) {
   verify_input(request.body.token)
     .then(id => Session.get(id))
     .then(return_object => prepare_response(return_object))
-    .then(res => response.json(res))
+    .then(return_object => response.json(return_object))
     .catch(error => response.json({ error: error.message }));
 }
 
 function verify_input(token) {
-  return new Promise((resolve, reject) => {
+  function executor(resolve, reject) {
     jsonwebtoken.verify(token, config.secret, (error, id) => {
       if (error) reject(error);
       else resolve(id);
     });
-  });
+  }
+  return new Promise(executor);
 }
 
 function prepare_response(return_object) {
