@@ -2,6 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
 import { Session } from "src/app/interfaces/session";
+import { switchMap } from "rxjs/operators";
+import { EMPTY, of } from "rxjs";
 
 @Component({
   selector: "app-session",
@@ -12,9 +14,9 @@ export class SessionComponent implements OnInit {
   private session: Session;
   private time_manager: any; // NodeJS.Timer
   private remaining_time: Date = new Date();
-  private answers: [boolean, boolean, boolean] = [false, false, false];
+  private answers: boolean[] = [false, false, false];
   private chestionar_index: number = 0;
-  private chestionar_generator: any;
+  private chestionare: IterableIterator<number>;
 
   constructor(
     private router: Router,
@@ -29,18 +31,16 @@ export class SessionComponent implements OnInit {
       this.remaining_time.setTime(this.remaining_time.getTime() - 1000);
       if (this.remaining_time.getTime() - 1000 <= 0) {
         clearInterval(this.time_manager);
-        this.verify_session_and_close();
+        this.verify_session_force_close();
       }
     }, 1000);
   }
 
-  verify_session_and_close() {
+  verify_session_force_close() {
     if (this.session.correct_answers > 21) {
       console.log("passed");
-      clearInterval(this.time_manager);
     } else {
       console.log("failed");
-      clearInterval(this.time_manager);
     }
   }
 
@@ -54,7 +54,7 @@ export class SessionComponent implements OnInit {
     }
   }
 
-  *generator() {
+  *chestionar_generator() {
     while (this.session.chestionare.length > 0) {
       if (this.chestionar_index == this.session.chestionare.length)
         this.chestionar_index = 0;
@@ -72,53 +72,59 @@ export class SessionComponent implements OnInit {
       // get session
       let token = localStorage.getItem("token");
       if (token == null) return this.router.navigate([""]);
-      this.session_service.get_session(token).subscribe(
-        response => {
-          if (response["error"]) {
-            console.log(response["error"]);
-            return;
-          }
-          if (response["status"]) {
-            switch (response["status"]) {
-              case "passed":
-                console.log("passed");
-                clearInterval(this.time_manager);
-                break;
-              case "failed":
-                console.log("failed");
-                clearInterval(this.time_manager);
-                break;
-              default:
-                this.session = response["session"];
-                this.remaining_time.setTime(
-                  response["now"] - Date.parse(this.session.created_at)
-                );
-                this.startTimer();
-                this.chestionar_generator = this.generator();
-            }
-          }
-        },
-        error => this.parse_error(error)
-      );
+      this.get_session(token);
     } else {
       // new session
-      this.session_service.new_session().subscribe(
-        response => {
-          if (response["error"]) {
-            console.log(response["error"]);
-            return;
-          }
-          if (response["session"]) {
-            this.session = response["session"];
-            localStorage.setItem("token", response["token"]);
-            this.remaining_time.setTime(1800000);
-            this.startTimer();
-            this.chestionar_generator = this.generator();
-          }
-        },
-        error => this.parse_error(error)
-      );
+      this.new_session();
     }
+  }
+
+  new_session(): void {
+    this.session_service.new_session().subscribe(
+      response => {
+        if (response["error"]) {
+          console.log(response["error"]);
+          return;
+        }
+        if (response["session"]) {
+          this.session = response["session"];
+          localStorage.setItem("token", response["token"]);
+          this.remaining_time.setTime(1800000);
+          this.startTimer();
+          this.chestionare = this.chestionar_generator();
+        }
+      },
+      error => this.parse_error(error)
+    );
+  }
+
+  get_session(token: string): void {
+    this.session_service.get_session(token).subscribe(
+      response => {
+        if (response["error"]) {
+          console.log(response["error"]);
+          return;
+        }
+        switch (response["status"]) {
+          case "passed":
+            console.log("passed");
+            clearInterval(this.time_manager);
+            break;
+          case "failed":
+            console.log("failed");
+            clearInterval(this.time_manager);
+            break;
+          default:
+            this.session = response["session"];
+            this.remaining_time.setTime(
+              response["now"] - Date.parse(this.session.created_at)
+            );
+            this.startTimer();
+            this.chestionare = this.chestionar_generator();
+        }
+      },
+      error => this.parse_error(error)
+    );
   }
 
   select_answer(i: number): boolean {
@@ -174,7 +180,7 @@ export class SessionComponent implements OnInit {
   }
 
   next_chestionar() {
-    this.chestionar_generator.next();
+    this.chestionare.next();
     this.answers = [false, false, false];
   }
 

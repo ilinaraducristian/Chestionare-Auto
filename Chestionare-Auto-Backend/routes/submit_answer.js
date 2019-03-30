@@ -14,8 +14,8 @@ function handleRequest(request, response) {
 }
 
 function verify_input(request) {
-  if (request.body.question_index === undefined)
-    return Promise.reject(new Error("question_index is missing"));
+  if (request.body.chestionar_index === undefined)
+    return Promise.reject(new Error("chestionar_index is missing"));
   if (request.body.answers === undefined)
     return Promise.reject(new Error("answers is missing"));
   if (request.body.token === undefined)
@@ -29,25 +29,19 @@ function verify_input(request) {
 }
 
 function prepare_response(return_object, request) {
-  return new Promise((resolve, reject) => {
-    return_object.session.chestionare.splice(request.body.question_index, 1);
-    if (return_object.status == "wrong") {
-      return_object.session.wrong_answers++;
-      return_object.session.save(err => {
-        if (err) return reject(new Error("cannot save session"));
-        resolve(return_object.status);
-      });
-    } else if (return_object.status == "correct") {
-      return_object.session.correct_answers++;
-      return_object.session.save(err => {
-        if (err) return reject(new Error("cannot save session"));
-        resolve(return_object.status);
-      });
-    } else {
-      return_object.session.remove(err => {
-        if (err) return reject(new Error("cannot remove session"));
-        resolve(return_object.status);
-      });
-    }
-  });
+  return_object.session.chestionare.splice(request.body.chestionar_index, 1);
+
+  function return_status() {
+    return Promise.resolve(return_object.status);
+  }
+
+  if (return_object.status == "failed" || return_object.status == "passed") {
+    return return_object.session.remove().then(return_status);
+  } else if (return_object.status == "correct") {
+    return_object.session.correct_answers++;
+    return return_object.session.save().then(return_status);
+  } else if (return_object.status == "wrong") {
+    return_object.session.wrong_answers++;
+    return return_object.session.save().then(return_status);
+  }
 }

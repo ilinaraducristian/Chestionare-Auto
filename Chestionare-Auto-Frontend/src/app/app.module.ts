@@ -18,7 +18,7 @@ const routes: Routes = [
 @NgModule({
   declarations: [AppComponent, HomeComponent, SessionComponent],
   imports: [
-    RouterModule.forRoot(routes, { enableTracing: false }), // debugging purposes only
+    RouterModule.forRoot(routes),
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
