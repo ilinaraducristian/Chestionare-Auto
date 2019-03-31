@@ -2,8 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
 import { Session } from "src/app/interfaces/session";
-import { switchMap } from "rxjs/operators";
-import { EMPTY, of } from "rxjs";
+import { filter, tap, map, catchError } from "rxjs/operators";
+import { of, pipe, UnaryFunction, Observable, merge } from "rxjs";
 
 @Component({
   selector: "app-session",
@@ -12,128 +12,174 @@ import { EMPTY, of } from "rxjs";
 })
 export class SessionComponent implements OnInit {
   private session: Session;
-  private time_manager: any; // NodeJS.Timer
+  private time_manager: NodeJS.Timer;
   private remaining_time: Date = new Date();
   private answers: boolean[] = [false, false, false];
   private chestionar_index: number = 0;
   private chestionare: IterableIterator<number>;
+  private status: string;
 
   constructor(
     private router: Router,
     private session_service: SessionService
   ) {}
 
-  /**
-   * call clearInterval() to stop the timer
-   */
-  startTimer() {
+  ngOnInit() {
+    if (this.session_service.get_category() == null) {
+      let token = localStorage.getItem("token");
+      if (token == null) return this.router.navigate([""]);
+      // get existing session if token is valid
+
+      merge(
+        // error handler observable
+        this.session_service.get_session(token).pipe(this.handle_error),
+        // response handler observable
+        this.session_service
+          .get_session(token)
+          .pipe(this.handle_get_session_response)
+      ).subscribe();
+    } else {
+      // get new session
+      merge(
+        // error handler observable
+        this.session_service.new_session().pipe(this.handle_error),
+        // response handler observable
+        this.session_service
+          .new_session()
+          .pipe(this.handle_new_session_response)
+      ).subscribe();
+    }
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.time_manager);
+  }
+
+  show_passed(): void {
+    this.session = null;
+    this.status = "passed";
+    localStorage.removeItem("token");
+  }
+
+  show_failed(): void {
+    this.session = null;
+    this.status = "failed";
+    localStorage.removeItem("token");
+  }
+
+  // starts timer
+  start_timer(): void {
     this.time_manager = setInterval(_ => {
       this.remaining_time.setTime(this.remaining_time.getTime() - 1000);
-      if (this.remaining_time.getTime() - 1000 <= 0) {
+      if (this.remaining_time.getTime() <= 0) {
         clearInterval(this.time_manager);
-        this.verify_session_force_close();
+        if (this.session.correct_answers > 21) {
+          this.show_passed();
+        } else {
+          this.show_failed();
+        }
       }
     }, 1000);
   }
 
-  verify_session_force_close() {
-    if (this.session.correct_answers > 21) {
-      console.log("passed");
-    } else {
-      console.log("failed");
-    }
-  }
-
-  verify_session() {
+  // check if session is finished
+  verify_session(): void {
     if (this.session.wrong_answers > 4) {
-      console.log("failed");
+      this.show_failed();
       clearInterval(this.time_manager);
     } else if (this.session.wrong_answers + this.session.correct_answers > 25) {
-      console.log("passed");
+      this.show_passed();
       clearInterval(this.time_manager);
     }
   }
 
-  *chestionar_generator() {
+  // generated a new chestionar from existing session
+  *chestionar_generator(): IterableIterator<number> {
     while (this.session.chestionare.length > 0) {
-      if (this.chestionar_index == this.session.chestionare.length)
+      if (this.chestionar_index == this.session.chestionare.length - 1)
         this.chestionar_index = 0;
       else this.chestionar_index++;
+      // console.log(this.chestionar_index);
+      // console.log(this.chestionar_index);
       yield;
     }
   }
 
-  ngOnDestroy() {
-    clearInterval(this.time_manager);
-  }
+  // catch frontend and backend erorrs and redirect back to home page
+  private handle_error: UnaryFunction<Observable<{}>, Observable<{}>> = pipe(
+    filter(response => response.hasOwnProperty("error")),
+    map(response => response["error"]),
+    catchError(error => of(error)),
+    tap(error => {
+      console.log(error);
+      localStorage.removeItem("token");
+      this.router.navigate([""]);
+    })
+  );
 
-  ngOnInit() {
-    if (this.session_service.get_category() == null) {
-      // get session
-      let token = localStorage.getItem("token");
-      if (token == null) return this.router.navigate([""]);
-      this.get_session(token);
-    } else {
-      // new session
-      this.new_session();
-    }
-  }
+  // get a new session from backend and display it
+  private handle_new_session_response: UnaryFunction<
+    Observable<{}>,
+    Observable<{}>
+  > = pipe(
+    filter(response => response.hasOwnProperty("session")),
+    tap(response => {
+      this.session = response["session"];
+      localStorage.setItem("token", response["token"]);
+      this.remaining_time.setTime(1800000);
+      this.start_timer();
+      this.chestionare = this.chestionar_generator();
+    })
+  );
 
-  new_session(): void {
-    this.session_service.new_session().subscribe(
-      response => {
-        if (response["error"]) {
-          console.log(response["error"]);
-          return;
-        }
-        if (response["session"]) {
+  // handle received session
+  private handle_get_session_response: UnaryFunction<
+    Observable<{}>,
+    Observable<{}>
+  > = pipe(
+    filter(response => {
+      return response.hasOwnProperty("status");
+    }),
+    tap(response => {
+      switch (response["status"]) {
+        case "correct":
+          this.session.correct_answers++;
+          this.verify_session();
+          break;
+        case "wrong":
+          this.session.wrong_answers++;
+          this.verify_session();
+          break;
+        case "passed":
+          this.show_passed();
+          clearInterval(this.time_manager);
+          break;
+        case "failed":
+          this.show_failed();
+          clearInterval(this.time_manager);
+          break;
+        default:
           this.session = response["session"];
-          localStorage.setItem("token", response["token"]);
-          this.remaining_time.setTime(1800000);
-          this.startTimer();
+          this.remaining_time.setTime(
+            Date.parse(response["now"]) - Date.parse(this.session.created_at)
+          );
+          this.start_timer();
           this.chestionare = this.chestionar_generator();
-        }
-      },
-      error => this.parse_error(error)
-    );
-  }
+      }
+    })
+  );
 
-  get_session(token: string): void {
-    this.session_service.get_session(token).subscribe(
-      response => {
-        if (response["error"]) {
-          console.log(response["error"]);
-          return;
-        }
-        switch (response["status"]) {
-          case "passed":
-            console.log("passed");
-            clearInterval(this.time_manager);
-            break;
-          case "failed":
-            console.log("failed");
-            clearInterval(this.time_manager);
-            break;
-          default:
-            this.session = response["session"];
-            this.remaining_time.setTime(
-              response["now"] - Date.parse(this.session.created_at)
-            );
-            this.startTimer();
-            this.chestionare = this.chestionar_generator();
-        }
-      },
-      error => this.parse_error(error)
-    );
-  }
+  /* TEMPLATE FUNCTIONS */
 
+  // select answers
   select_answer(i: number): boolean {
     this.answers[i] = !this.answers[i];
     return false;
   }
 
-  send_answer() {
-    // boolean to String
+  // send answers to backend
+  send_answer(): void {
+    // convert answers from boolean to string
     let answers =
       (this.answers[0] ? "A" : "") +
       (this.answers[1] ? "B" : "") +
@@ -142,51 +188,34 @@ export class SessionComponent implements OnInit {
     // remove answered chestionar
     this.session.chestionare.splice(this.chestionar_index, 1);
 
-    this.session_service
-      .send_answers(
-        localStorage.getItem("token"),
-        this.chestionar_index,
-        answers
-      )
-      .subscribe(
-        response => {
-          if (response["error"]) {
-            console.log(response["status"]);
-            return;
-          }
-          switch (response["status"]) {
-            case "correct":
-              this.session.correct_answers++;
-              this.next_chestionar();
-              this.verify_session();
-              break;
-            case "wrong":
-              this.session.wrong_answers++;
-              this.next_chestionar();
-              this.verify_session();
-              break;
-            case "passed":
-              console.log("passed");
-              clearInterval(this.time_manager);
-              break;
-            case "failed":
-              console.log("failed");
-              clearInterval(this.time_manager);
-              break;
-          }
-        },
-        error => this.parse_error(error)
-      );
+    // reset answers
+    this.answers = [false, false, false];
+
+    // post requet from service
+
+    merge(
+      // error handler observable
+      this.session_service
+        .send_answers(
+          localStorage.getItem("token"),
+          this.chestionar_index,
+          answers
+        )
+        .pipe(this.handle_error),
+      // response handler observable
+      this.session_service
+        .send_answers(
+          localStorage.getItem("token"),
+          this.chestionar_index,
+          answers
+        )
+        .pipe(this.handle_get_session_response)
+    ).subscribe();
   }
 
-  next_chestionar() {
+  // show next chestionar
+  next_chestionar(): void {
     this.chestionare.next();
     this.answers = [false, false, false];
-  }
-
-  parse_error(error) {
-    console.log(error);
-    localStorage.removeItem("token");
-    this.router.navigate([""]);
   }
 }

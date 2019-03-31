@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
-import { Category } from "src/app/interfaces/category";
 
 @Component({
   selector: "app-home",
@@ -23,7 +22,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {}
 
-  new_session(category: string) {
+  new_session(category: string): void {
     this.session_service.set_category(category.toLowerCase().replace(" ", "_"));
     this.router.navigate(["session"]);
   }

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  backend: "http://heroku_ceva:8888/"
+  backend: "https://chestionare-auto-backend.herokuapp.com/"
 };

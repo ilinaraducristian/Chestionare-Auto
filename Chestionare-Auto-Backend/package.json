@@ -4,7 +4,7 @@
   "description": "chestionare_auto_backend",
   "main": "app.js",
   "scripts": {
-    "start": "./node_modules/nodemon/bin/nodemon.js app.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
