@@ -11,13 +11,13 @@ import { of, pipe, UnaryFunction, Observable, merge } from "rxjs";
   styleUrls: ["./session.component.css"]
 })
 export class SessionComponent implements OnInit {
-  private session: Session;
+  public session: Session;
   private time_manager: NodeJS.Timer;
   private remaining_time: Date = new Date();
   private answers: boolean[] = [false, false, false];
   private chestionar_index: number = 0;
   private chestionare: IterableIterator<number>;
-  private status: string;
+  public status: string;
 
   constructor(
     private router: Router,
