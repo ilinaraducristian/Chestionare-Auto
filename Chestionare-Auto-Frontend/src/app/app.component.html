@@ -1,1 +1,14 @@
+<nav class="navbar navbar-expand navbar-light bg-light">
+  <div class="" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item" [ngClass]="{ active: this.route == 'home' }">
+        <a class="nav-link" href="/">Acasă</a>
+      </li>
+      <li class="nav-item" [ngClass]="{ active: this.route == 'session' }">
+        <a class="nav-link" href="/session">Chestionar</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
 <router-outlet></router-outlet>

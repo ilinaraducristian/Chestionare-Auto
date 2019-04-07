@@ -161,7 +161,9 @@ export class SessionComponent implements OnInit {
         default:
           this.session = response["session"];
           this.remaining_time.setTime(
-            Date.parse(response["now"]) - Date.parse(this.session.created_at)
+            Date.parse(this.session.created_at) +
+              1800000 -
+              Date.parse(response["now"])
           );
           this.start_timer();
           this.chestionare = this.chestionar_generator();
