@@ -1,0 +1,14 @@
+// POST pt new    session
+// PUT  pt update session
+// GET  pt get    session
+
+// Empty body
+GET /get_session   => {"error":"Token is missing."}
+GET /new_session   => 404
+GET /submit_answer => 404
+GET *            => 404
+
+ce trb:
+GET /get_session cu body care contine token si returneaza sesiunea respectiva
+POST /new_session cu body care contine category si returneaza sesiunea si tokenul
+PUT /submit_answer cu body care contine raspunsul la intrebare si returneaza un status
