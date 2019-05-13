@@ -3,10 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Chestionar } from './interfaces/chestionar.interface';
 import { Session } from './interfaces/session.interface';
-import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AppService {
+  private chestionarModels: Object;
   constructor(
     @InjectModel('categoria_a')
     private readonly chestionarModelCategoriaA: Model<Chestionar>,
@@ -18,34 +18,30 @@ export class AppService {
     private readonly chestionarModelCategoriaD: Model<Chestionar>,
     @InjectModel('session')
     private readonly sessionModel: Model<Session>,
-  ) {}
-
+  ) {
+    this.chestionarModels = {
+      categoria_a: this.chestionarModelCategoriaA,
+      categoria_b: this.chestionarModelCategoriaB,
+      categoria_c: this.chestionarModelCategoriaC,
+      categoria_d: this.chestionarModelCategoriaD,
+    };
+  }
+  /**
+   * Queries the database for chestionare.
+   * @param category One of the 4 categories as a string.
+   * @return Returns 26 chestionare without the "_id" filed.
+   */
   getChestionare(category: string): Promise<Chestionar[]> {
-    let categoryModel: Model<Chestionar>;
-    switch (category) {
-      case 'categoria_a':
-        categoryModel = this.chestionarModelCategoriaA;
-        break;
-      case 'categoria_b':
-        categoryModel = this.chestionarModelCategoriaB;
-        break;
-      case 'categoria_c':
-        categoryModel = this.chestionarModelCategoriaC;
-        break;
-      case 'categoria_d':
-        categoryModel = this.chestionarModelCategoriaD;
-        break;
-    }
-    return categoryModel
+    return this.chestionarModels[category]
       .aggregate([{ $sample: { size: 26 } }, { $project: { _id: 0 } }])
       .exec();
   }
-
-  getSession(id: string): Promise<Session> {
-    return this.sessionModel.findById(id).exec();
-  }
-
-  newSession(category: string): Promise<Object> {
+  /**
+   * Generates a new session based on the category.
+   * @param category One of the four categories as a string.
+   * @return
+   */
+  newSession(category: string): Promise<Object | Session> {
     return this.getChestionare(category).then(chestionare =>
       new this.sessionModel({
         created_at: new Date(),
@@ -54,5 +50,9 @@ export class AppService {
         wrong_answers: 0,
       }).save(),
     );
+  }
+
+  getSession(id: string): Promise<Session> {
+    return this.sessionModel.findById(id).exec();
   }
 }
