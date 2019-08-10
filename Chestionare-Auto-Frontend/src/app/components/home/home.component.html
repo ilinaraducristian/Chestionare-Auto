@@ -5,10 +5,14 @@
   >
     <div
       class="btn-group btn-group-toggle col-12 "
-      *ngFor="let category of categories"
+      *ngFor="let category of categories[0]; let i = index"
     >
       <label class="btn-primary" ngbButtonLabel>
-        <input type="checkbox" ngbButton (click)="this.new_session(category)" />
+        <input
+          type="checkbox"
+          ngbButton
+          (click)="this.new_session(categories[1][i])"
+        />
         {{ category }}
       </label>
     </div>

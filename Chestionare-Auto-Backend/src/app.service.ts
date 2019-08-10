@@ -8,30 +8,30 @@ import { Session } from './interfaces/session.interface';
 export class AppService {
   private chestionarModels: Object;
   constructor(
-    @InjectModel('categoria_a')
-    private readonly chestionarModelCategoriaA: Model<Chestionar>,
-    @InjectModel('categoria_b')
-    private readonly chestionarModelCategoriaB: Model<Chestionar>,
-    @InjectModel('categoria_c')
-    private readonly chestionarModelCategoriaC: Model<Chestionar>,
-    @InjectModel('categoria_d')
-    private readonly chestionarModelCategoriaD: Model<Chestionar>,
+    @InjectModel('category_a')
+    private readonly chestionarModelcategoryA: Model<Chestionar>,
+    @InjectModel('category_b')
+    private readonly chestionarModelcategoryB: Model<Chestionar>,
+    @InjectModel('category_c')
+    private readonly chestionarModelcategoryC: Model<Chestionar>,
+    @InjectModel('category_d')
+    private readonly chestionarModelcategoryD: Model<Chestionar>,
     @InjectModel('session')
     private readonly sessionModel: Model<Session>,
   ) {
     this.chestionarModels = {
-      categoria_a: this.chestionarModelCategoriaA,
-      categoria_b: this.chestionarModelCategoriaB,
-      categoria_c: this.chestionarModelCategoriaC,
-      categoria_d: this.chestionarModelCategoriaD,
+      category_a: this.chestionarModelcategoryA,
+      category_b: this.chestionarModelcategoryB,
+      category_c: this.chestionarModelcategoryC,
+      category_d: this.chestionarModelcategoryD,
     };
   }
   /**
    * Queries the database for chestionare.
    * @param category One of the 4 categories as a string.
-   * @return Returns 26 chestionare without the "_id" filed.
+   * @return Returns a promise with 26 chestionare without _id.
    */
-  getChestionare(category: string): Promise<Chestionar[]> {
+  getChestionareFromDB(category: string): Promise<Chestionar[]> {
     return this.chestionarModels[category]
       .aggregate([{ $sample: { size: 26 } }, { $project: { _id: 0 } }])
       .exec();
@@ -41,8 +41,8 @@ export class AppService {
    * @param category One of the four categories as a string.
    * @return
    */
-  newSession(category: string): Promise<Object | Session> {
-    return this.getChestionare(category).then(chestionare =>
+  newSession(category: string): Promise<Session> {
+    return this.getChestionareFromDB(category).then(chestionare =>
       new this.sessionModel({
         created_at: new Date(),
         chestionare,

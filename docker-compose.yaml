@@ -1,15 +1,28 @@
 version: "3.7"
 services:
   backend:
-    build: ./Chestionare-Auto-Backend
+    image: reydw/node-dev
     ports:
-      - 8888:8888
+      - 3000:3000
     volumes:
-      - ./Chestionare-Auto-Backend:/usr/src/
+      - ./Chestionare-Auto-Backend:/usr/src
+    entrypoint:
+      - npm
+      - run
+      - start:dev
 
   frontend:
-    build: ./Chestionare-Auto-Frontend
+    image: reydw/angular-dev
     ports:
       - 4200:4200
     volumes:
       - ./Chestionare-Auto-Frontend:/usr/src/
+    entrypoint:
+      - npm
+      - run
+      - start:dev
+
+  database:
+    image: mongo
+    ports:
+      - 27017:27017

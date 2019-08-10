@@ -8,11 +8,9 @@ import { Router } from "@angular/router";
   styleUrls: ["./home.component.css"]
 })
 export class HomeComponent implements OnInit {
-  public categories: Array<string> = [
-    "Categoria A",
-    "Categoria B",
-    "Categoria C",
-    "Categoria D"
+  public categories: string[][] = [
+    ["Categoria A", "Categoria B", "Categoria C", "Categoria D"],
+    ["category_a", "category_b", "category_c", "category_d"]
   ];
 
   constructor(

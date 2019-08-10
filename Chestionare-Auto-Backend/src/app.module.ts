@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChestionarSchema } from './schemas/chestionar.schema';
-import { config } from '../config';
+import config from 'config';
 import { SessionSchema } from './schemas/session.schema';
 
 @Module({
@@ -22,10 +22,10 @@ export class AppModule {
       collection?: string;
     }[] = [];
     let categories: string[] = [
-      'categoria_a',
-      'categoria_b',
-      'categoria_c',
-      'categoria_d',
+      'category_a',
+      'category_b',
+      'category_c',
+      'category_d',
     ];
     for (let i = 0; i < categories.length; i++) {
       models.push({

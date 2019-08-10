@@ -19,18 +19,16 @@ export class SessionService {
 
   new_session(): Observable<ReturnObject> {
     return this.http.post<ReturnObject>(
-      environment.backend + "new_session",
-      { category: this.category },
+      `${environment.backend}/${this.category}`,
+      {},
       { headers: this.headers }
     );
   }
 
   get_session(token: String): Observable<object> {
-    return this.http.post(
-      environment.backend + "get_session",
-      { token },
-      { headers: this.headers }
-    );
+    return this.http.get(`${environment.backend}/${token}`, {
+      headers: this.headers
+    });
   }
 
   send_answers(
@@ -38,9 +36,9 @@ export class SessionService {
     index: number,
     answers: string
   ): Observable<object> {
-    return this.http.post(
-      environment.backend + "submit_answer",
-      { token, chestionar_index: index, answers },
+    return this.http.put(
+      `${environment.backend}/${token}`,
+      { id: index, answers },
       { headers: this.headers }
     );
   }

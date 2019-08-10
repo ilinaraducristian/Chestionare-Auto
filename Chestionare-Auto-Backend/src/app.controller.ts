@@ -1,19 +1,60 @@
-import { Controller, Get, Res, Req, Post, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Res,
+  Post,
+  Body,
+  Param,
+  Put,
+  HttpStatus,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { Session } from './interfaces/session.interface';
 import { Response } from 'express';
+import * as jwt from 'jsonwebtoken';
+import config from 'config';
+import { AnswersBody } from './interfaces/answers_body.interface';
 
 @Controller('session')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get(':token')
-  getChestionar(@Param('token') token: string): string {
+  getSession(@Param('token') token: string, @Res() response: Response): any {
+    let id;
+    try {
+      id = jwt.verify(token, config.secret);
+    } catch {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: 'Invalid token!' });
+    }
     this.appService
-      .getChestionare('categoria_a')
-      .then(session => console.log(session))
-      .catch(error => console.log(error));
-    return 'it works!';
+      .getSession(id)
+      .then(session => {
+        let now = new Date().getTime();
+        let session_expiration_date =
+          Date.parse(session.created_at.toString()) + 1800000;
+        if (now >= session_expiration_date) {
+          if (session.correct_answers >= 22) {
+            return session
+              .remove()
+              .then(_ => response.json({ status: 'passed' }));
+          } else {
+            return session
+              .remove()
+              .then(_ => response.json({ status: 'failed' }));
+          }
+        } else {
+          response.json(session);
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        response
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ error: 'Invalid session id!' });
+      });
   }
 
   @Post(':category')
@@ -21,11 +62,77 @@ export class AppController {
     this.appService
       .newSession(category)
       .then(session => {
-        let newSession = (session as Session).toObject() as Session;
-        delete newSession._id;
-        delete newSession.chestionare; // debug only
-        response.json(session);
+        session = session.toObject() as Session;
+        let token = jwt.sign(session._id.toString(), config.secret);
+        delete session._id;
+        response.json({ token, session });
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.log(error);
+        response
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ error: 'Invalid category!' });
+      });
+  }
+
+  @Put(':token')
+  submitAnswer(
+    @Param('token') token: string,
+    @Body() answersBody: AnswersBody,
+    @Res() response: Response,
+  ) {
+    let id;
+    try {
+      id = jwt.verify(token, config.secret);
+    } catch (error) {
+      console.log(error);
+    }
+    this.appService
+      .getSession(id)
+      .then(session => {
+        let now = new Date().getTime();
+        let session_expiration_date =
+          Date.parse(session.created_at.toString()) + 1800000;
+        if (now >= session_expiration_date) {
+          if (session.correct_answers >= 22) {
+            return session
+              .remove()
+              .then(_ => response.json({ status: 'passed' }));
+          } else {
+            return session
+              .remove()
+              .then(_ => response.json({ status: 'failed' }));
+          }
+        } else {
+          let chestionar = session.chestionare[answersBody.id];
+          let status: string;
+          if (!chestionar) return Promise.reject('Chestionar not found!');
+          if (chestionar.correct_answers === answersBody.answers) {
+            session.correct_answers++;
+            status = 'correct';
+          } else {
+            session.wrong_answers++;
+            status = 'wrong';
+          }
+          if (session.wrong_answers >= 5) {
+            return session
+              .remove()
+              .then(_ => response.json({ status: 'failed' }));
+          }
+          session.chestionare = session.chestionare.splice(answersBody.id, 1);
+          if (session.chestionare.length == 0) {
+            session.remove().then(_ => response.json({ status: 'passed' }));
+          } else {
+            session.save().then(_ => response.json({ status }));
+          }
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        response
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ error: 'Invalid session id or body!' });
+      });
+    return response.send('ok');
   }
 }
