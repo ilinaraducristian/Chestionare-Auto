@@ -20,8 +20,8 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {}
 
-  new_session(category: string): void {
-    this.session_service.set_category(category.toLowerCase().replace(" ", "_"));
+  new_session(index: number): void {
+    this.session_service.set_category(this.categories[1][index]);
     this.router.navigate(["session"]);
   }
 }

@@ -39,17 +39,24 @@ export class AppService {
   /**
    * Generates a new session based on the category.
    * @param category One of the four categories as a string.
-   * @return
+   * @return Returns a new session.
    */
   newSession(category: string): Promise<Session> {
-    return this.getChestionareFromDB(category).then(chestionare =>
-      new this.sessionModel({
-        created_at: new Date(),
-        chestionare,
-        correct_answers: 0,
-        wrong_answers: 0,
-      }).save(),
-    );
+    return this.getChestionareFromDB(category)
+      .then(chestionare => {
+        if (chestionare.length === 0) {
+          return Promise.reject('Chestioanre not found!');
+        }
+        return Promise.resolve(chestionare);
+      })
+      .then(chestionare =>
+        new this.sessionModel({
+          created_at: new Date(),
+          chestionare,
+          correct_answers: 0,
+          wrong_answers: 0,
+        }).save(),
+      );
   }
 
   getSession(id: string): Promise<Session> {

@@ -7,6 +7,9 @@ up:
 down stop:
 	@docker-compose $@
 
+restart:
+	@docker-compose restart
+
 remove: down
 	@docker image rm chestionare-auto_frontend chestionare-auto_backend chestionare-auto_database
 

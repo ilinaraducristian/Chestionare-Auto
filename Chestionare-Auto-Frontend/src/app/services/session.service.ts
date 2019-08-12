@@ -2,52 +2,49 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { environment } from "../../environments/environment";
-import { ReturnObject } from "../interfaces/return-object";
+import { BackendResponse } from "../interfaces/backend_response";
 
 @Injectable({
   providedIn: "root"
 })
 export class SessionService {
-  private category: String;
-  private headers: HttpHeaders;
+  private category: string;
+  private jsonHeaders: HttpHeaders;
 
   constructor(private http: HttpClient) {
-    this.headers = new HttpHeaders({
+    this.jsonHeaders = new HttpHeaders({
       "Content-Type": "application/json"
     });
   }
 
-  new_session(): Observable<ReturnObject> {
-    return this.http.post<ReturnObject>(
+  new_session(): Observable<BackendResponse> {
+    return this.http.post<BackendResponse>(
       `${environment.backend}/${this.category}`,
-      {},
-      { headers: this.headers }
+      null
     );
   }
 
-  get_session(token: String): Observable<object> {
-    return this.http.get(`${environment.backend}/${token}`, {
-      headers: this.headers
-    });
+  get_session(token: string): Observable<BackendResponse> {
+    return this.http.get<BackendResponse>(`${environment.backend}/${token}`);
   }
 
   send_answers(
     token: string,
     index: number,
     answers: string
-  ): Observable<object> {
-    return this.http.put(
+  ): Observable<BackendResponse> {
+    return this.http.put<BackendResponse>(
       `${environment.backend}/${token}`,
       { id: index, answers },
-      { headers: this.headers }
+      { headers: this.jsonHeaders }
     );
   }
 
-  set_category(category: String) {
+  set_category(category: string) {
     this.category = category;
   }
 
-  get_category(): String {
+  get_category(): string {
     return this.category;
   }
 }
