@@ -31,10 +31,13 @@ export class AppController {
         .status(HttpStatus.BAD_REQUEST)
         .json({ error: 'Invalid token!' });
     }
-
     this.appService
       .getSession(id)
       .then(session => this.isSessionExpired(session, response))
+      .then(session => {
+        if (!session) return;
+        response.json({ session });
+      })
       .catch(error => {
         console.log(error);
         response
@@ -45,10 +48,19 @@ export class AppController {
 
   @Post(':category')
   newSession(@Param('category') category: string, @Res() response: Response) {
+    let categories = ['category_a', 'category_b', 'category_c', 'category_d'];
+    if (!categories.includes(category))
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: 'Invalid category!' });
     this.appService
       .newSession(category)
       .then(session => {
         session = session.toObject() as Session;
+        session.chestionare.map(chestionar => {
+          delete chestionar.correct_answers;
+          return chestionar;
+        });
         let token = jwt.sign(session._id.toString(), config.secret);
         delete session._id;
         response.json({ token, session });
@@ -100,7 +112,7 @@ export class AppController {
             .remove()
             .then(_ => response.json({ status: 'failed' }));
         }
-        session.chestionare = session.chestionare.splice(answersBody.id, 1);
+        session.chestionare.splice(answersBody.id, 1);
         if (session.chestionare.length == 0) {
           session.remove().then(_ => response.json({ status: 'passed' }));
         } else {
@@ -118,11 +130,10 @@ export class AppController {
     session: Session,
     response,
   ): Promise<Session | void> {
-    let now = new Date().getTime();
-    let session_expiration_date =
-      Date.parse(session.created_at.toString()) + 1800000;
+    let now = new Date();
+    let session_expiration_date = session.created_at.getTime() + 1800000;
     // If session expired
-    if (now >= session_expiration_date) {
+    if (now.getTime() >= session_expiration_date) {
       if (session.correct_answers >= 22) {
         return session.remove().then(_ => {
           response.json({ status: 'passed' });
@@ -133,6 +144,11 @@ export class AppController {
         });
       }
     }
+    session.chestionare.map(chestionar => {
+      delete chestionar.correct_answers;
+      return chestionar;
+    });
+    session.now = now;
     return Promise.resolve(session);
   }
 }

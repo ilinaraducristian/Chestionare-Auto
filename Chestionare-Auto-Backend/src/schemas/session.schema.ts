@@ -3,6 +3,7 @@ import { ChestionarSchema } from './chestionar.schema';
 export const SessionSchema = new Schema(
   {
     created_at: Date,
+    now: Date,
     chestionare: [ChestionarSchema],
     correct_answers: Number,
     wrong_answers: Number,

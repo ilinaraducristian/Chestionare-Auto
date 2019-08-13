@@ -9,6 +9,7 @@ import { HomeComponent } from "./components/home/home.component";
 import { SessionComponent } from "./components/session/session.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { FormsModule } from "@angular/forms";
+import { ChestionarComponent } from './components/chestionar/chestionar.component';
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
@@ -16,7 +17,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, SessionComponent],
+  declarations: [AppComponent, HomeComponent, SessionComponent, ChestionarComponent],
   imports: [
     RouterModule.forRoot(routes),
     HttpClientModule,

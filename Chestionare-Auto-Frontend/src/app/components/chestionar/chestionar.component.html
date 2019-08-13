@@ -1,0 +1,66 @@
+<div *ngIf="this.session" class="container">
+  <div class="row justify-content-center">
+    <span class="badge badge-pill badge-warning col-5 col-sm-4 col-md-2">
+      Timp rămas:
+      {{ Math.floor(this.remaining_time / 60) | number: "2.0-0" }}:{{
+        this.remaining_time % 60 | number: "2.0-0"
+      }}
+    </span>
+    <span class="badge badge-pill badge-info col-5 col-sm-4 col-md-2">
+      Intrebări rămase:
+      {{ 26 - this.session.correct_answers - this.session.wrong_answers }}
+    </span>
+    <span class="badge badge-pill badge-success col-5 col-sm-4 col-md-2">
+      Răspunsuri corecte: {{ this.session.correct_answers }}
+    </span>
+    <span class="badge badge-pill badge-danger col-5 col-sm-4 col-md-2">
+      Răspunsuri greșite: {{ this.session.wrong_answers }}
+    </span>
+  </div>
+  <div class="row">
+    <h5 class="col-12 question">
+      {{ this.chestionar.question }}
+    </h5>
+  </div>
+
+  <div
+    *ngIf="this.chestionar.image"
+    style="text-align: center;"
+    class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 offset-sm-1 offset-md-2 offset-lg-3 offset-xl-4"
+  >
+    <img
+      style="width: auto;height: 10em;"
+      src="assets/{{ this.chestionar.image }}"
+    />
+  </div>
+
+  <div
+    class="list-group col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 offset-sm-1 offset-md-2 offset-lg-3 offset-xl-4"
+  >
+    <a
+      *ngFor="let answer of this.chestionar.answers; let i = index"
+      class="list-group-item list-group-item-action"
+      href="#"
+      [ngClass]="{ active: this.answers[i] }"
+      (click)="this.select_answer(i)"
+    >
+      {{ answer }}
+    </a>
+  </div>
+  <div class="row justify-content-center">
+    <button
+      type="button"
+      class="btn btn-success col-5 col-sm-5 col-md-4 col-lg-3 col-xl-2"
+      (click)="this.send_answers()"
+    >
+      Trimite răspunsul
+    </button>
+    <button
+      type="button"
+      class="btn btn-warning col-5 col-sm-5 col-md-4 col-lg-3 col-xl-2"
+      (click)="this.next_chestionar()"
+    >
+      Următoarea întrebare
+    </button>
+  </div>
+</div>

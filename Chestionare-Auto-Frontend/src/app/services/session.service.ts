@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import { environment } from "../../environments/environment";
 import { BackendResponse } from "../interfaces/backend_response";
 
@@ -18,6 +18,10 @@ export class SessionService {
   }
 
   new_session(): Observable<BackendResponse> {
+    if (!this.category) return throwError("Category not provided!");
+    let categories = ["category_a", "category_b", "category_c", "category_d"];
+    if (!categories.includes(this.category))
+      return throwError("Wrong category!");
     return this.http.post<BackendResponse>(
       `${environment.backend}/${this.category}`,
       null

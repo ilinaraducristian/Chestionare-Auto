@@ -49,14 +49,16 @@ export class AppService {
         }
         return Promise.resolve(chestionare);
       })
-      .then(chestionare =>
-        new this.sessionModel({
-          created_at: new Date(),
+      .then(chestionare => {
+        let now = new Date();
+        return new this.sessionModel({
+          created_at: now,
+          now,
           chestionare,
           correct_answers: 0,
           wrong_answers: 0,
-        }).save(),
-      );
+        }).save();
+      });
   }
 
   getSession(id: string): Promise<Session> {
