@@ -27,9 +27,9 @@ export class SessionComponent implements OnInit {
         response => {
           if (response.status) {
             if (response.status == "passed") {
-              // ai trecut
+              this.show_passed();
             } else if (response.status == "failed") {
-              // nu ai trecut
+              this.show_failed();
             }
             return;
           }
@@ -56,8 +56,12 @@ export class SessionComponent implements OnInit {
     }
   }
 
-  session_status(event: Event) {
-    console.log(event);
+  session_status(event: string) {
+    if (event == "passed") {
+      this.show_passed();
+    } else {
+      this.show_failed();
+    }
   }
 
   show_passed(): void {
