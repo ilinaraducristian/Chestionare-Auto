@@ -3,7 +3,6 @@ import { Session } from "src/app/interfaces/session";
 import { Timer } from "src/app/classes/timer";
 import { Chestionar } from "src/app/interfaces/chestionar";
 import { SessionService } from "src/app/services/session.service";
-import { BackendResponse } from "src/app/interfaces/backend_response";
 
 @Component({
   selector: "app-chestionar",
