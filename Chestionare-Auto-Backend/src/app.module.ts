@@ -3,42 +3,31 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChestionarSchema } from './schemas/chestionar.schema';
-import config from 'config';
 import { SessionSchema } from './schemas/session.schema';
+import { MongoService } from './services/mongo-models/mongo.service';
+import { categories } from 'src/categories';
+import config from 'config';
 
 @Module({
   imports: [
     MongooseModule.forRoot(config.mongoURI, { useNewUrlParser: true }),
-    AppModule.generateModels(),
+    AppModule.generate_models(),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MongoService],
 })
 export class AppModule {
-  static generateModels() {
-    let models: {
-      name: string;
-      schema: any;
-      collection?: string;
-    }[] = [];
-    let categories: string[] = [
-      'category_a',
-      'category_b',
-      'category_c',
-      'category_d',
-    ];
-    for (let i = 0; i < categories.length; i++) {
+  static generate_models() {
+    let models: { name: string; schema; collection?: string }[];
+    models = [{ name: 'session', schema: SessionSchema }];
+    categories.forEach(category => {
       models.push({
-        name: categories[i],
+        name: category,
         schema: ChestionarSchema,
-        collection: categories[i],
+        collection: category,
       });
-    }
-    models.push({
-      name: 'session',
-      schema: SessionSchema,
-      collection: 'sessions',
     });
+
     return MongooseModule.forFeature(models);
   }
 }

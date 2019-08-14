@@ -2,7 +2,9 @@
   *ngIf="this.status === 'working'"
   [session]="this.session"
   (session_status)="this.session_status($event)"
-></app-chestionar>
+>
+</app-chestionar>
+
 <div
   *ngIf="this.status === 'loading'"
   class="alert alert-primary"

@@ -1,38 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { Chestionar } from './interfaces/chestionar.interface';
 import { Session } from './interfaces/session.interface';
+import { MongoService } from './services/mongo-models/mongo.service';
 
 @Injectable()
 export class AppService {
-  private chestionarModels: Object;
-  constructor(
-    @InjectModel('category_a')
-    private readonly chestionarModelcategoryA: Model<Chestionar>,
-    @InjectModel('category_b')
-    private readonly chestionarModelcategoryB: Model<Chestionar>,
-    @InjectModel('category_c')
-    private readonly chestionarModelcategoryC: Model<Chestionar>,
-    @InjectModel('category_d')
-    private readonly chestionarModelcategoryD: Model<Chestionar>,
-    @InjectModel('session')
-    private readonly sessionModel: Model<Session>,
-  ) {
-    this.chestionarModels = {
-      category_a: this.chestionarModelcategoryA,
-      category_b: this.chestionarModelcategoryB,
-      category_c: this.chestionarModelcategoryC,
-      category_d: this.chestionarModelcategoryD,
-    };
-  }
+  constructor(private readonly mongo_service: MongoService) {}
   /**
    * Queries the database for chestionare.
    * @param category One of the 4 categories as a string.
    * @return Returns a promise with 26 chestionare without _id.
    */
-  getChestionareFromDB(category: string): Promise<Chestionar[]> {
-    return this.chestionarModels[category]
+  get_chestionare_from_db(category: string): Promise<Chestionar[]> {
+    return this.mongo_service[category]
       .aggregate([{ $sample: { size: 26 } }, { $project: { _id: 0 } }])
       .exec();
   }
@@ -41,17 +21,18 @@ export class AppService {
    * @param category One of the four categories as a string.
    * @return Returns a new session.
    */
-  newSession(category: string): Promise<Session> {
-    return this.getChestionareFromDB(category)
+  new_session(category: string): Promise<Session> {
+    return this.get_chestionare_from_db(category)
       .then(chestionare => {
         if (chestionare.length === 0) {
-          return Promise.reject('Chestioanre not found!');
+          return Promise.reject('Chestionare not found!');
+        } else {
+          return Promise.resolve(chestionare);
         }
-        return Promise.resolve(chestionare);
       })
       .then(chestionare => {
         let now = new Date();
-        return new this.sessionModel({
+        return new this.mongo_service.models.session({
           created_at: now,
           now,
           chestionare,
@@ -61,7 +42,7 @@ export class AppService {
       });
   }
 
-  getSession(id: string): Promise<Session> {
-    return this.sessionModel.findById(id).exec();
+  get_session(id: string): Promise<Session> {
+    return this.mongo_service.models.session.findById(id).exec();
   }
 }

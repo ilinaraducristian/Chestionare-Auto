@@ -14,55 +14,28 @@ import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import config from 'config';
 import { AnswersBody } from './interfaces/answers_body.interface';
+import { categories } from './categories';
 
 @Controller('session')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
-  @Get(':token')
-  getSession(@Param('token') token: string, @Res() response: Response) {
-    let id;
-
-    try {
-      id = jwt.verify(token, config.secret);
-    } catch (error) {
-      console.log(error);
-      return response
-        .status(HttpStatus.BAD_REQUEST)
-        .json({ error: 'Invalid token!' });
-    }
-    this.appService
-      .getSession(id)
-      .then(session => this.isSessionExpired(session, response))
-      .then(session => {
-        if (!session) return;
-        response.json({ session });
-      })
-      .catch(error => {
-        console.log(error);
-        response
-          .status(HttpStatus.BAD_REQUEST)
-          .json({ error: 'Invalid session id!' });
-      });
-  }
+  constructor(private readonly app_service: AppService) {}
 
   @Post(':category')
-  newSession(@Param('category') category: string, @Res() response: Response) {
-    let categories = ['category_a', 'category_b', 'category_c', 'category_d'];
+  new_session(@Param('category') category: string, @Res() response: Response) {
     if (!categories.includes(category))
       return response
         .status(HttpStatus.BAD_REQUEST)
         .json({ error: 'Invalid category!' });
-    this.appService
-      .newSession(category)
+    this.app_service
+      .new_session(category)
       .then(session => {
-        session = session.toObject() as Session;
+        session = session.toObject();
+        delete session._id;
         session.chestionare.map(chestionar => {
           delete chestionar.correct_answers;
           return chestionar;
         });
         let token = jwt.sign(session._id.toString(), config.secret);
-        delete session._id;
         response.json({ token, session });
       })
       .catch(error => {
@@ -73,50 +46,70 @@ export class AppController {
       });
   }
 
+  @Get(':token')
+  get_session(@Param('token') token: string, @Res() response: Response) {
+    this.verify_token(token)
+      .then(id => this.app_service.get_session(id))
+      .then(this.is_session_expired)
+      .then(({ session, status }) => {
+        if (status == 'passed' || status == 'failed') {
+          session.remove().then(() => {
+            response.json({ status });
+          });
+        } else {
+          session = session.toObject();
+          delete session._id;
+          session.chestionare.map(chestionar => {
+            delete chestionar.correct_answers;
+            return chestionar;
+          });
+          response.json({ session });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        response
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ error: 'Invalid session id!' });
+      });
+  }
+
   @Put(':token')
   sendAnswers(
     @Param('token') token: string,
     @Body() answersBody: AnswersBody,
     @Res() response: Response,
   ) {
-    let id;
-
-    try {
-      id = jwt.verify(token, config.secret);
-    } catch (error) {
-      console.log(error);
-      return response
-        .status(HttpStatus.BAD_REQUEST)
-        .json({ error: 'Invalid token!' });
-    }
-
-    this.appService
-      .getSession(id)
-      .then(session => this.isSessionExpired(session, response))
-      .then(session => {
-        if (!session) return;
-
-        let chestionar = session.chestionare[answersBody.id];
-        let status: string;
-        if (!chestionar)
-          return Promise.reject(new Error('Chestionar not found!'));
-        if (chestionar.correct_answers === answersBody.answers) {
-          session.correct_answers++;
-          status = 'correct';
+    this.verify_token(token)
+      .then(id => this.app_service.get_session(id))
+      .then(this.is_session_expired)
+      .then(({ session, status }) => {
+        if (status == 'passed' || status == 'failed') {
+          session.remove().then(() => {
+            response.json({ status });
+          });
         } else {
-          session.wrong_answers++;
-          status = 'wrong';
-        }
-        if (session.wrong_answers >= 5) {
-          return session
-            .remove()
-            .then(_ => response.json({ status: 'failed' }));
-        }
-        session.chestionare.splice(answersBody.id, 1);
-        if (session.chestionare.length == 0) {
-          session.remove().then(_ => response.json({ status: 'passed' }));
-        } else {
-          session.save().then(_ => response.json({ status }));
+          let chestionar = session.chestionare[answersBody.id];
+          if (!chestionar)
+            return Promise.reject(new Error('Chestionar not found!'));
+          if (chestionar.correct_answers === answersBody.answers) {
+            session.correct_answers++;
+            status = 'correct';
+          } else {
+            session.wrong_answers++;
+            status = 'wrong';
+          }
+          if (session.wrong_answers >= 5) {
+            return session
+              .remove()
+              .then(_ => response.json({ status: 'failed' }));
+          }
+          session.chestionare.splice(answersBody.id, 1);
+          if (session.chestionare.length == 0) {
+            session.remove().then(_ => response.json({ status: 'passed' }));
+          } else {
+            session.save().then(_ => response.json({ status }));
+          }
         }
       })
       .catch(error => {
@@ -126,29 +119,26 @@ export class AppController {
           .json({ error: 'Invalid session id or body!' });
       });
   }
-  private isSessionExpired(
-    session: Session,
-    response,
-  ): Promise<Session | void> {
+  private is_session_expired(session: Session) {
     let now = new Date();
     let session_expiration_date = session.created_at.getTime() + 1800000;
-    // If session expired
     if (now.getTime() >= session_expiration_date) {
       if (session.correct_answers >= 22) {
-        return session.remove().then(_ => {
-          response.json({ status: 'passed' });
-        });
+        return Promise.resolve({ session, status: 'passed' });
       } else {
-        return session.remove().then(_ => {
-          response.json({ status: 'failed' });
-        });
+        return Promise.resolve({ session, status: 'failed' });
       }
     }
-    session.chestionare.map(chestionar => {
-      delete chestionar.correct_answers;
-      return chestionar;
-    });
-    session.now = now;
-    return Promise.resolve(session);
+    return Promise.resolve({ session, status: 'no' });
+  }
+
+  verify_token(token: string) {
+    let id;
+    try {
+      id = jwt.verify(token, config.secret);
+    } catch (error) {
+      return Promise.reject('Invalid token!');
+    }
+    return Promise.resolve(id);
   }
 }
