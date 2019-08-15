@@ -30,12 +30,12 @@ export class AppController {
       .new_session(category)
       .then(session => {
         session = session.toObject();
-        delete session._id;
         session.chestionare.map(chestionar => {
           delete chestionar.correct_answers;
           return chestionar;
         });
         let token = jwt.sign(session._id.toString(), config.secret);
+        delete session._id;
         response.json({ token, session });
       })
       .catch(error => {
@@ -58,11 +58,11 @@ export class AppController {
           });
         } else {
           session = session.toObject();
-          delete session._id;
           session.chestionare.map(chestionar => {
             delete chestionar.correct_answers;
             return chestionar;
           });
+          delete session._id;
           response.json({ session });
         }
       })
