@@ -2,9 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
 import { Session } from "src/app/interfaces/session";
-import { tap, catchError } from "rxjs/operators";
-import { of } from "rxjs";
-import { Timer } from "src/app/classes/timer";
+import { environment } from "../../../environments/environment";
 
 @Component({
   selector: "app-session",
@@ -33,7 +31,7 @@ export class SessionComponent implements OnInit {
             }
             return;
           }
-          this.session = response["session"];
+          this.set_session(response["session"]);
           this.status = "working";
         },
         error => {
@@ -45,7 +43,7 @@ export class SessionComponent implements OnInit {
       this.session_service.new_session().subscribe(
         response => {
           localStorage.setItem("token", response["token"]);
-          this.session = response["session"];
+          this.set_session(response["session"]);
           this.status = "working";
         },
         error => {
@@ -54,6 +52,19 @@ export class SessionComponent implements OnInit {
         }
       );
     }
+  }
+
+  set_session(session: Session) {
+    session.chestionare.map(chestionar => {
+      if (!chestionar.image) return;
+      if (environment.cdn) {
+        chestionar.image = `${environment.cdn}${chestionar.image}`;
+      } else {
+        chestionar.image = `assets/${chestionar.image}`;
+      }
+      return chestionar;
+    });
+    this.session = session;
   }
 
   session_status(event: string) {

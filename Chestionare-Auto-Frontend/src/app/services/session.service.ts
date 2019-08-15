@@ -23,13 +23,13 @@ export class SessionService {
     if (!categories.includes(this.category))
       return throwError("Wrong category!");
     return this.http.post<BackendResponse>(
-      `${environment.backend}/${this.category}`,
+      `${environment.backend}${this.category}`,
       null
     );
   }
 
   get_session(token: string): Observable<BackendResponse> {
-    return this.http.get<BackendResponse>(`${environment.backend}/${token}`);
+    return this.http.get<BackendResponse>(`${environment.backend}${token}`);
   }
 
   send_answers(
@@ -38,7 +38,7 @@ export class SessionService {
     answers: string
   ): Observable<BackendResponse> {
     return this.http.put<BackendResponse>(
-      `${environment.backend}/${token}`,
+      `${environment.backend}${token}`,
       { id: index, answers },
       { headers: this.jsonHeaders }
     );
