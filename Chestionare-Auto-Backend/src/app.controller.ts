@@ -8,11 +8,11 @@ import {
   Put,
   HttpStatus,
 } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 import { AppService } from './app.service';
 import { Session } from './interfaces/session.interface';
 import { Response } from 'express';
-import * as jwt from 'jsonwebtoken';
-import config from 'config';
+import { Config } from './classes/config';
 import { AnswersBody } from './interfaces/answers_body.interface';
 import { categories } from './categories';
 
@@ -25,7 +25,7 @@ export class AppController {
     if (!categories.includes(category))
       return response
         .status(HttpStatus.BAD_REQUEST)
-        .json({ error: 'Invalid category!' });
+        .send({ error: 'Invalid category!' });
     this.app_service
       .new_session(category)
       .then(session => {
@@ -34,15 +34,15 @@ export class AppController {
           delete chestionar.correct_answers;
           return chestionar;
         });
-        let token = jwt.sign(session._id.toString(), config.secret);
+        let token = jwt.sign(session._id.toString(), Config.secret);
         delete session._id;
-        response.json({ token, session });
+        response.send({ token, session });
       })
       .catch(error => {
         console.log(error);
         response
           .status(HttpStatus.BAD_REQUEST)
-          .json({ error: 'Invalid category!' });
+          .send({ error: 'Invalid category!' });
       });
   }
 
@@ -54,7 +54,7 @@ export class AppController {
       .then(({ session, status }) => {
         if (status == 'passed' || status == 'failed') {
           session.remove().then(() => {
-            response.json({ status });
+            response.send({ status });
           });
         } else {
           session = session.toObject();
@@ -63,14 +63,14 @@ export class AppController {
             return chestionar;
           });
           delete session._id;
-          response.json({ session });
+          response.send({ session });
         }
       })
       .catch(error => {
         console.log(error);
         response
           .status(HttpStatus.BAD_REQUEST)
-          .json({ error: 'Invalid session id!' });
+          .send({ error: 'Invalid session id!' });
       });
   }
 
@@ -86,7 +86,7 @@ export class AppController {
       .then(({ session, status }) => {
         if (status == 'passed' || status == 'failed') {
           session.remove().then(() => {
-            response.json({ status });
+            response.send({ status });
           });
         } else {
           let chestionar = session.chestionare[answersBody.id];
@@ -102,13 +102,13 @@ export class AppController {
           if (session.wrong_answers >= 5) {
             return session
               .remove()
-              .then(_ => response.json({ status: 'failed' }));
+              .then(_ => response.send({ status: 'failed' }));
           }
           session.chestionare.splice(answersBody.id, 1);
           if (session.chestionare.length == 0) {
-            session.remove().then(_ => response.json({ status: 'passed' }));
+            session.remove().then(_ => response.send({ status: 'passed' }));
           } else {
-            session.save().then(_ => response.json({ status }));
+            session.save().then(_ => response.send({ status }));
           }
         }
       })
@@ -116,7 +116,7 @@ export class AppController {
         console.log(error);
         response
           .status(HttpStatus.BAD_REQUEST)
-          .json({ error: 'Invalid session id or body!' });
+          .send({ error: 'Invalid session id or body!' });
       });
   }
   private is_session_expired(session: Session) {
@@ -135,7 +135,7 @@ export class AppController {
   verify_token(token: string) {
     let id;
     try {
-      id = jwt.verify(token, config.secret);
+      id = jwt.verify(token, Config.secret);
     } catch (error) {
       return Promise.reject('Invalid token!');
     }

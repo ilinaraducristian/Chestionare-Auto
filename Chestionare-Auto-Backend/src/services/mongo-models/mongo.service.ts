@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Chestionar } from 'src/interfaces/chestionar.interface';
-import { Session } from 'src/interfaces/session.interface';
+import { Chestionar } from '../../interfaces/chestionar.interface';
+import { Session } from '../../interfaces/session.interface';
 
 @Injectable()
 export class MongoService {
