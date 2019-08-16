@@ -34,7 +34,6 @@ export class AppService {
         let now = new Date();
         return new this.mongo_service.models.session({
           created_at: now,
-          now,
           chestionare,
           correct_answers: 0,
           wrong_answers: 0,
