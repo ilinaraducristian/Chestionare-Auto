@@ -1,0 +1,23 @@
+{
+  "name": "chestionare-auto-nest",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Reydw",
+  "license": "MIT",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^6.5.3",
+    "@nestjs/core": "^6.5.3",
+    "@nestjs/mongoose": "^6.1.2",
+    "@nestjs/platform-express": "^6.5.3",
+    "@nestjs/platform-fastify": "^6.5.3",
+    "@types/jsonwebtoken": "^8.3.3",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.6.9",
+    "reflect-metadata": "^0.1.12",
+    "rimraf": "^2.7.0",
+    "rxjs": "^6.5.2"
+  }
+}

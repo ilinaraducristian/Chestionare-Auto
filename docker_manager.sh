@@ -28,9 +28,10 @@ while true; do
     "8" "Angular TTY" \
     "9" "Mongo TTY" \
     "10" "Install modules" \
-    "11" "Remove node_modules" \
+    "11" "Remove modules" \
     "12" "Fix permissions" \
     "13" "Import database data" \
+    "14" "Build production" \
     2>&1 1>&3)
   exit_status=$?
   exec 3>&-
@@ -97,6 +98,10 @@ while true; do
         docker exec chestionare-auto_database_1 mongoimport -d chestionare_auto -c "category_$i" --file "category_$i.json" --jsonArray
         docker exec chestionare-auto_database_1 rm "category_$i.json"
       done
+      ;;
+    10 )
+      docker exec chestionare-auto_backend_1 npm run build:prod;
+      docker exec chestionare-auto_frontend_1 npm run build:prod;
       ;;
   esac
 done

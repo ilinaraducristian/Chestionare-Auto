@@ -39,8 +39,15 @@
 Thumbs.db
 
 # Custom
-assets
-category_a.json
-category_b.json
-category_c.json
-category_d.json
+/Chestionare-Auto-Frontend/src/assets
+/category_a.json
+/category_b.json
+/category_c.json
+/category_d.json
+/Chestionare-Auto-Production/chestionare-auto-angular/public/*
+/Chestionare-Auto-Production/chestionare-auto-nest/*
+/Chestionare-Auto-Production/chestionare-auto-cdn/assets/*
+/Chestionare-Auto-Production/chestionare-auto-angular/.git
+/Chestionare-Auto-Production/chestionare-auto-nest/.git
+/Chestionare-Auto-Production/chestionare-auto-cdn/.git
+!/Chestionare-Auto-Production/chestionare-auto-nest/package.json
