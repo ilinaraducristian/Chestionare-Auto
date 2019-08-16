@@ -11,6 +11,7 @@ import { environment } from "../../../environments/environment";
 })
 export class SessionComponent implements OnInit {
   public session: Session;
+  public now: string;
   public status: string;
 
   constructor(private router: Router, private session_service: SessionService) {
@@ -32,6 +33,7 @@ export class SessionComponent implements OnInit {
             return;
           }
           this.set_session(response["session"]);
+          this.set_now(response["now"]);
           this.status = "working";
         },
         error => {
@@ -43,7 +45,9 @@ export class SessionComponent implements OnInit {
       this.session_service.new_session().subscribe(
         response => {
           localStorage.setItem("token", response["token"]);
+          this.session_service.set_category(null);
           this.set_session(response["session"]);
+          this.set_now(response["now"]);
           this.status = "working";
         },
         error => {
@@ -65,6 +69,10 @@ export class SessionComponent implements OnInit {
       return chestionar;
     });
     this.session = session;
+  }
+
+  set_now(now: string) {
+    this.now = now;
   }
 
   session_status(event: string) {

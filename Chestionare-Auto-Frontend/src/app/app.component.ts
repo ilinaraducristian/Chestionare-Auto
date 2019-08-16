@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
-import { Router, NavigationStart, NavigationEnd } from "@angular/router";
-import { filter, delay } from "rxjs/operators";
+import { Router, NavigationEnd } from "@angular/router";
+import { filter } from "rxjs/operators";
 
 @Component({
   selector: "app-root",
@@ -25,5 +25,10 @@ export class AppComponent {
             this.route = "";
         }
       });
+  }
+
+  goto(location: string) {
+    this.router.navigate([location]);
+    return false;
   }
 }

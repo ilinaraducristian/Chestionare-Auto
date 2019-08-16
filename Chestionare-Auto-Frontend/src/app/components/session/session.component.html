@@ -1,6 +1,7 @@
 <app-chestionar
   *ngIf="this.status === 'working'"
   [session]="this.session"
+  [now]="this.now"
   (session_status)="this.session_status($event)"
 >
 </app-chestionar>

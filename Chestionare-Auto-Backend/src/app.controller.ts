@@ -36,7 +36,8 @@ export class AppController {
         });
         let token = jwt.sign(session._id.toString(), Config.secret);
         delete session._id;
-        response.send({ token, session });
+        let now = session.created_at;
+        response.send({ token, session, now });
       })
       .catch(error => {
         console.log(error);
@@ -63,7 +64,8 @@ export class AppController {
             return chestionar;
           });
           delete session._id;
-          response.send({ session });
+          let now = new Date();
+          response.send({ session, now });
         }
       })
       .catch(error => {

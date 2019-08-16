@@ -3,7 +3,6 @@ import { Document } from 'mongoose';
 
 export interface Session extends Document {
   created_at: Date;
-  now: Date;
   chestionare: Chestionar[];
   correct_answers: number;
   wrong_answers: number;

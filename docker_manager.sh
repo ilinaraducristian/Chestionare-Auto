@@ -85,7 +85,7 @@ while true; do
       ;;
     11 )
       rm -rf ./Chestionare-Auto-Backend/node_modules;
-	  rm -rf ./Chestionare-Auto-Frontend/node_modules;
+	    rm -rf ./Chestionare-Auto-Frontend/node_modules;
       ;;
     12 )
       sudo chown -R reydw *

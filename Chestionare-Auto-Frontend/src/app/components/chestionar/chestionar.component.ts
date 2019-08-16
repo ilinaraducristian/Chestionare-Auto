@@ -12,6 +12,8 @@ import { SessionService } from "src/app/services/session.service";
 export class ChestionarComponent implements OnInit {
   @Input("session")
   public session: Session;
+  @Input("now")
+  public now: string;
 
   @Output("session_status")
   public session_status: EventEmitter<string>;
@@ -37,7 +39,6 @@ export class ChestionarComponent implements OnInit {
     this.session_status = new EventEmitter<string>();
     this.session = {
       created_at: "",
-      now: "",
       chestionare: [],
       correct_answers: 0,
       wrong_answers: 0
@@ -54,7 +55,7 @@ export class ChestionarComponent implements OnInit {
     this.remaining_time =
       Date.parse(this.session.created_at) / 1000 +
       1800 -
-      Date.parse(this.session.now) / 1000;
+      Date.parse(this.now) / 1000;
     this.timer.onTick(time => {
       this.remaining_time = time;
     });
