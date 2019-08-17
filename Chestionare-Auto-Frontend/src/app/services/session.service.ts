@@ -1,9 +1,13 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Observable, throwError } from "rxjs";
-import { environment } from "../../environments/environment";
-import { BackendResponse } from "../interfaces/backend_response";
+
 import { categories } from "../classes/categories";
+
+import { environment } from "../../environments/environment";
+
+import { BackendResponse } from "../interfaces/backend_response";
+
+import { Observable, throwError } from "rxjs";
 
 @Injectable({
   providedIn: "root"

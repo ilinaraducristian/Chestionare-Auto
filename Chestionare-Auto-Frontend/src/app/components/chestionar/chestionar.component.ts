@@ -1,7 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
-import { Session } from "src/app/interfaces/session";
+
 import { Timer } from "src/app/classes/timer";
+
 import { Chestionar } from "src/app/interfaces/chestionar";
+import { Session } from "src/app/interfaces/session";
+
 import { SessionService } from "src/app/services/session.service";
 
 @Component({
@@ -11,22 +14,22 @@ import { SessionService } from "src/app/services/session.service";
 })
 export class ChestionarComponent implements OnInit {
   @Input("session")
-  public session: Session;
+  private session: Session;
   @Input("now")
-  public now: string;
+  private now: string;
 
   @Output("session_status")
-  public session_status: EventEmitter<string>;
+  private session_status: EventEmitter<string>;
 
-  public remaining_time: number;
-  public answers: boolean[];
-  public chestionar: Chestionar;
+  private _remaining_time: number;
+  private _answers: boolean[];
+  private _chestionar: Chestionar;
   public Math = Math;
 
-  private timer: Timer;
-  private chestionar_index;
-  private token: string;
-  private chestionar_generator: IterableIterator<{
+  private _timer: Timer;
+  private _chestionar_index;
+  private _token: string;
+  private _chestionar_generator: IterableIterator<{
     item: Chestionar;
     index: number;
   }>;
@@ -134,7 +137,6 @@ export class ChestionarComponent implements OnInit {
           console.log(error);
         }
       );
-
     return false;
   }
 
@@ -144,5 +146,66 @@ export class ChestionarComponent implements OnInit {
     this.chestionar = item;
     this.chestionar_index = index;
     return false;
+  }
+
+  set remaining_time(remaining_time: number) {
+    this._remaining_time = remaining_time;
+  }
+
+  set answers(answers: boolean[]) {
+    this._answers = answers;
+  }
+
+  set chestionar(chestionar: Chestionar) {
+    this._chestionar = chestionar;
+  }
+
+  set timer(timer: Timer) {
+    this._timer = timer;
+  }
+
+  set chestionar_index(chestionar_index: number) {
+    this._chestionar_index = chestionar_index;
+  }
+
+  set token(token: string) {
+    this._token = token;
+  }
+
+  set chestionar_generator(
+    chestionar_generator: IterableIterator<{
+      item: Chestionar;
+      index: number;
+    }>
+  ) {
+    this._chestionar_generator = chestionar_generator;
+  }
+
+  get remaining_time() {
+    return this._remaining_time;
+  }
+
+  get answers() {
+    return this._answers;
+  }
+
+  get chestionar() {
+    return this._chestionar;
+  }
+
+  get timer() {
+    return this._timer;
+  }
+
+  get chestionar_index() {
+    return this._chestionar_index;
+  }
+
+  get token() {
+    return this._token;
+  }
+
+  get chestionar_generator() {
+    return this._chestionar_generator;
   }
 }

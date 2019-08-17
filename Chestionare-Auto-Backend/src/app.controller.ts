@@ -8,12 +8,16 @@ import {
   Put,
   HttpStatus,
 } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
-import { AppService } from './app.service';
-import { Session } from './interfaces/session.interface';
-import { Response } from 'express';
+
 import { Config } from './classes/config';
+
 import { AnswersBody } from './interfaces/answers_body.interface';
+import { Session } from './interfaces/session.interface';
+
+import { AppService } from './app.service';
+
+import { Response } from 'express';
+import * as jwt from 'jsonwebtoken';
 import { categories } from './categories';
 
 @Controller('session')

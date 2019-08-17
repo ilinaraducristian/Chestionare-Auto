@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+
+import { Config } from './classes/config';
+
 import { AppController } from './app.controller';
+
 import { AppService } from './app.service';
+import { MongoService } from './services/mongo-models/mongo.service';
+
 import { ChestionarSchema } from './schemas/chestionar.schema';
 import { SessionSchema } from './schemas/session.schema';
-import { MongoService } from './services/mongo-models/mongo.service';
+
 import { categories } from './categories';
-import { Config } from './classes/config';
 
 @Module({
   imports: [

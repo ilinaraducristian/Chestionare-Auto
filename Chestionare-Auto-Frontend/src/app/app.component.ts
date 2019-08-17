@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
-import { Router, NavigationEnd } from "@angular/router";
+import { NavigationEnd, Router } from "@angular/router";
+
 import { filter } from "rxjs/operators";
 
 @Component({

@@ -1,10 +1,4 @@
-import {
-  interval,
-  Subscription,
-  Observable,
-  MonoTypeOperatorFunction,
-  of
-} from "rxjs";
+import { interval, Subscription, Observable } from "rxjs";
 import { tap, take, map } from "rxjs/operators";
 
 export class Timer {

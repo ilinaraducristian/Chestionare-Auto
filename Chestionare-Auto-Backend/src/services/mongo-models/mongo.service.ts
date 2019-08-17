@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+
 import { Chestionar } from '../../interfaces/chestionar.interface';
 import { Session } from '../../interfaces/session.interface';
 
+import { Model } from 'mongoose';
+
 @Injectable()
 export class MongoService {
-  public readonly models: {
+  private readonly _models: {
     category_a: Model<Chestionar>;
     category_b: Model<Chestionar>;
     category_c: Model<Chestionar>;
@@ -25,12 +27,16 @@ export class MongoService {
     @InjectModel('session')
     private readonly session: Model<Session>,
   ) {
-    this.models = {
+    this._models = {
       category_a: this.category_a,
       category_b: this.category_b,
       category_c: this.category_c,
       category_d: this.category_d,
       session: this.session,
     };
+  }
+
+  get models() {
+    return this._models;
   }
 }

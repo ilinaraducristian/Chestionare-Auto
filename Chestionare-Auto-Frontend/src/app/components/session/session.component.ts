@@ -1,8 +1,11 @@
 import { Component, OnInit } from "@angular/core";
-import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
-import { Session } from "src/app/interfaces/session";
+
 import { environment } from "../../../environments/environment";
+
+import { Session } from "../../interfaces/session";
+
+import { SessionService } from "../../services/session.service";
 
 @Component({
   selector: "app-session",

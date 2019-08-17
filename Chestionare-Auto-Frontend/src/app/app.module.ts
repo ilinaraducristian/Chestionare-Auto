@@ -1,30 +1,30 @@
 import { BrowserModule } from "@angular/platform-browser";
+import { FormsModule } from "@angular/forms";
+import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 
+import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+
 import { AppRoutingModule } from "./app-routing.module";
+
 import { AppComponent } from "./app.component";
-import { RouterModule, Routes } from "@angular/router";
-import { HttpClientModule } from "@angular/common/http";
+import { ChestionarComponent } from "./components/chestionar/chestionar.component";
 import { HomeComponent } from "./components/home/home.component";
 import { SessionComponent } from "./components/session/session.component";
-import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-import { FormsModule } from "@angular/forms";
-import { ChestionarComponent } from './components/chestionar/chestionar.component';
-
-const routes: Routes = [
-  { path: "", component: HomeComponent },
-  { path: "session", component: SessionComponent }
-];
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, SessionComponent, ChestionarComponent],
+  declarations: [
+    AppComponent,
+    ChestionarComponent,
+    HomeComponent,
+    SessionComponent
+  ],
   imports: [
-    RouterModule.forRoot(routes),
-    HttpClientModule,
-    BrowserModule,
     AppRoutingModule,
-    NgbModule,
-    FormsModule
+    BrowserModule,
+    FormsModule,
+    HttpClientModule,
+    NgbModule
   ],
   providers: [],
   bootstrap: [AppComponent]
