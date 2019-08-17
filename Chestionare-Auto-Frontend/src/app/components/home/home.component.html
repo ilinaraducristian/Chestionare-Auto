@@ -1,15 +1,15 @@
 <div class="container ">
   <h1 class="row col-12 justify-content-center">Chestionare Auto</h1>
   <div
-    *ngFor="let category of categories[0]; let i = index"
+    *ngFor="let category of shown_categories | keyvalue"
     class="row justify-content-center"
   >
     <button
       type="button"
       class="btn btn-primary col-6 col-sm-6 col-md-4 col-lg-4 col-xl-4"
-      (click)="this.new_session(i)"
+      (click)="this.new_session()"
     >
-      {{ category }}
+      {{ category.value }}
     </button>
   </div>
 </div>

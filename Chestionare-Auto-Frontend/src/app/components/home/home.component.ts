@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { SessionService } from "src/app/services/session.service";
 import { Router } from "@angular/router";
+import { categories } from "src/app/classes/categories";
 
 @Component({
   selector: "app-home",
@@ -8,20 +9,28 @@ import { Router } from "@angular/router";
   styleUrls: ["./home.component.css"]
 })
 export class HomeComponent implements OnInit {
-  public categories: string[][] = [
-    ["Categoria A", "Categoria B", "Categoria C", "Categoria D"],
-    ["category_a", "category_b", "category_c", "category_d"]
-  ];
+  public _shown_categories: object;
 
-  constructor(
-    private router: Router,
-    private session_service: SessionService
-  ) {}
+  constructor(private router: Router, private session_service: SessionService) {
+    categories.forEach(category => {
+      this.shown_categories[category] = `Categoria ${category
+        .substring(category.length - 1)
+        .toUpperCase()}`;
+    });
+  }
 
   ngOnInit() {}
 
   new_session(index: number): void {
-    this.session_service.set_category(this.categories[1][index]);
+    this.session_service.category = this.shown_categories[1][index];
     this.router.navigate(["session"]);
+  }
+
+  set shown_categories(shown_categories: object) {
+    this._shown_categories = shown_categories;
+  }
+
+  get shown_categories(): object {
+    return this._shown_categories;
   }
 }

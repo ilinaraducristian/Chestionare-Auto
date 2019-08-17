@@ -10,16 +10,16 @@ import { environment } from "../../../environments/environment";
   styleUrls: ["./session.component.css"]
 })
 export class SessionComponent implements OnInit {
-  public session: Session;
-  public now: string;
-  public status: string;
+  private _session: Session;
+  private _now: string;
+  private _status: string;
 
   constructor(private router: Router, private session_service: SessionService) {
     this.status = "loading";
   }
 
   ngOnInit() {
-    if (this.session_service.get_category() == null) {
+    if (this.session_service.category == null) {
       let token = localStorage.getItem("token");
       if (token == null) return this.router.navigate([""]);
       this.session_service.get_session(token).subscribe(
@@ -32,8 +32,8 @@ export class SessionComponent implements OnInit {
             }
             return;
           }
-          this.set_session(response["session"]);
-          this.set_now(response["now"]);
+          this.session = response["session"];
+          this.now = response["now"];
           this.status = "working";
         },
         error => {
@@ -45,9 +45,9 @@ export class SessionComponent implements OnInit {
       this.session_service.new_session().subscribe(
         response => {
           localStorage.setItem("token", response["token"]);
-          this.session_service.set_category(null);
-          this.set_session(response["session"]);
-          this.set_now(response["now"]);
+          this.session_service.category = null;
+          this.session = response["session"];
+          this.now = response["now"];
           this.status = "working";
         },
         error => {
@@ -56,23 +56,6 @@ export class SessionComponent implements OnInit {
         }
       );
     }
-  }
-
-  set_session(session: Session) {
-    session.chestionare.map(chestionar => {
-      if (!chestionar.image) return;
-      if (environment.cdn) {
-        chestionar.image = `${environment.cdn}${chestionar.image}`;
-      } else {
-        chestionar.image = `assets/${chestionar.image}`;
-      }
-      return chestionar;
-    });
-    this.session = session;
-  }
-
-  set_now(now: string) {
-    this.now = now;
   }
 
   session_status(event: string) {
@@ -93,5 +76,40 @@ export class SessionComponent implements OnInit {
     this.session = null;
     localStorage.removeItem("token");
     this.status = "failed";
+  }
+
+  set session(session: Session) {
+    if (session != null) {
+      session.chestionare.map(chestionar => {
+        if (!chestionar.image) return;
+        if (environment.cdn) {
+          chestionar.image = `${environment.cdn}${chestionar.image}`;
+        } else {
+          chestionar.image = `assets/${chestionar.image}`;
+        }
+        return chestionar;
+      });
+    }
+    this._session = session;
+  }
+
+  get session(): Session {
+    return this._session;
+  }
+
+  set now(now: string) {
+    this._now = now;
+  }
+
+  get now(): string {
+    return this._now;
+  }
+
+  set status(status: string) {
+    this._status = status;
+  }
+
+  get status(): string {
+    return this._status;
   }
 }

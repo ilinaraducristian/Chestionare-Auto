@@ -3,23 +3,23 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, throwError } from "rxjs";
 import { environment } from "../../environments/environment";
 import { BackendResponse } from "../interfaces/backend_response";
+import { categories } from "../classes/categories";
 
 @Injectable({
   providedIn: "root"
 })
 export class SessionService {
-  private category: string;
-  private jsonHeaders: HttpHeaders;
+  private _category: string;
+  private _json_headers: HttpHeaders;
 
   constructor(private http: HttpClient) {
-    this.jsonHeaders = new HttpHeaders({
+    this.json_headers = new HttpHeaders({
       "Content-Type": "application/json"
     });
   }
 
   new_session(): Observable<BackendResponse> {
     if (!this.category) return throwError("Category not provided!");
-    let categories = ["category_a", "category_b", "category_c", "category_d"];
     if (!categories.includes(this.category))
       return throwError("Wrong category!");
     return this.http.post<BackendResponse>(
@@ -40,15 +40,23 @@ export class SessionService {
     return this.http.put<BackendResponse>(
       `${environment.backend}${token}`,
       { id: index, answers },
-      { headers: this.jsonHeaders }
+      { headers: this.json_headers }
     );
   }
 
-  set_category(category: string) {
-    this.category = category;
+  set category(category: string) {
+    this._category = category;
   }
 
-  get_category(): string {
-    return this.category;
+  get category(): string {
+    return this._category;
+  }
+
+  set json_headers(json_headers: HttpHeaders) {
+    this._json_headers = json_headers;
+  }
+
+  get json_headers(): HttpHeaders {
+    return this._json_headers;
   }
 }

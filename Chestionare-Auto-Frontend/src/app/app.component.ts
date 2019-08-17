@@ -8,9 +8,10 @@ import { filter } from "rxjs/operators";
   styleUrls: ["./app.component.css"]
 })
 export class AppComponent {
-  public route: string = "";
+  private _route: string;
 
   constructor(private router: Router) {
+    this.route = "";
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(navigation => {
@@ -25,6 +26,14 @@ export class AppComponent {
             this.route = "";
         }
       });
+  }
+
+  set route(route: string) {
+    this._route = route;
+  }
+
+  get route(): string {
+    return this._route;
   }
 
   goto(location: string) {

@@ -31,9 +31,8 @@ export class AppService {
         }
       })
       .then(chestionare => {
-        let now = new Date();
         return new this.mongo_service.models.session({
-          created_at: now,
+          created_at: new Date(),
           chestionare,
           correct_answers: 0,
           wrong_answers: 0,
