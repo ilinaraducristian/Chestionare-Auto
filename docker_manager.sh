@@ -32,8 +32,8 @@ while true; do
     "12" "Fix permissions" \
     "13" "Import database data" \
     "14" "Build production" \
-    "15" "Start Nest environment" \
-    "16" "Start Angular environment" \
+    "15" "Start Angular environment" \
+    "16" "Start Nest environment" \
     "17" "Start Mongo environment" \
     2>&1 1>&3)
   exit_status=$?

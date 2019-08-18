@@ -9,8 +9,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 
-import { Config } from './classes/config';
-
 import { AnswersBody } from './interfaces/answers_body.interface';
 import { Session } from './interfaces/session.interface';
 
@@ -38,7 +36,7 @@ export class AppController {
           delete chestionar.correct_answers;
           return chestionar;
         });
-        let token = jwt.sign(session._id.toString(), Config.secret);
+        let token = jwt.sign(session._id.toString(), process.env.secret);
         delete session._id;
         let now = session.created_at;
         response.send({ token, session, now });
@@ -141,7 +139,7 @@ export class AppController {
   verify_token(token: string) {
     let id;
     try {
-      id = jwt.verify(token, Config.secret);
+      id = jwt.verify(token, process.env.secret);
     } catch (error) {
       return Promise.reject('Invalid token!');
     }
