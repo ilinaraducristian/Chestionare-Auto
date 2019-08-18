@@ -11,7 +11,7 @@ import { SessionService } from "src/app/services/session.service";
   styleUrls: ["./home.component.css"]
 })
 export class HomeComponent implements OnInit {
-  private _shown_categories: object;
+  public shown_categories: object;
 
   constructor(private router: Router, private session_service: SessionService) {
     this.shown_categories = {};
@@ -28,13 +28,5 @@ export class HomeComponent implements OnInit {
     this.session_service.category = key;
     this.router.navigate(["session"]);
     return false;
-  }
-
-  set shown_categories(shown_categories: object) {
-    this._shown_categories = shown_categories;
-  }
-
-  get shown_categories(): object {
-    return this._shown_categories;
   }
 }

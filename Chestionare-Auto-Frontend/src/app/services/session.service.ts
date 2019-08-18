@@ -13,8 +13,8 @@ import { Observable, throwError } from "rxjs";
   providedIn: "root"
 })
 export class SessionService {
-  private _category: string;
-  private _json_headers: HttpHeaders;
+  public category: string;
+  private json_headers: HttpHeaders;
 
   constructor(private http: HttpClient) {
     this.json_headers = new HttpHeaders({
@@ -46,21 +46,5 @@ export class SessionService {
       { id: index, answers },
       { headers: this.json_headers }
     );
-  }
-
-  set category(category: string) {
-    this._category = category;
-  }
-
-  get category(): string {
-    return this._category;
-  }
-
-  set json_headers(json_headers: HttpHeaders) {
-    this._json_headers = json_headers;
-  }
-
-  get json_headers(): HttpHeaders {
-    return this._json_headers;
   }
 }

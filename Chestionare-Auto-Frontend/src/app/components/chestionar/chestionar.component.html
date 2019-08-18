@@ -2,8 +2,8 @@
   <div class="row justify-content-center">
     <span class="badge badge-pill badge-warning col-5 col-sm-4 col-md-2">
       Timp rămas:
-      {{ Math.floor(this.remaining_time / 60) | number: "2.0-0" }}:{{
-        this.remaining_time % 60 | number: "2.0-0"
+      {{ this.remaining_time.minutes | number: "2.0-0" }}:{{
+        this.remaining_time.seconds | number: "2.0-0"
       }}
     </span>
     <span class="badge badge-pill badge-info col-5 col-sm-4 col-md-2">

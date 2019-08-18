@@ -14,8 +14,8 @@ import { SessionService } from "../../services/session.service";
 })
 export class SessionComponent implements OnInit {
   private _session: Session;
-  private _now: string;
-  private _status: string;
+  public now: string;
+  public status: string;
 
   constructor(private router: Router, private session_service: SessionService) {
     this.status = "loading";
@@ -96,23 +96,7 @@ export class SessionComponent implements OnInit {
     this._session = session;
   }
 
-  get session(): Session {
+  get session() {
     return this._session;
-  }
-
-  set now(now: string) {
-    this._now = now;
-  }
-
-  get now(): string {
-    return this._now;
-  }
-
-  set status(status: string) {
-    this._status = status;
-  }
-
-  get status(): string {
-    return this._status;
   }
 }

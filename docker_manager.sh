@@ -32,6 +32,9 @@ while true; do
     "12" "Fix permissions" \
     "13" "Import database data" \
     "14" "Build production" \
+    "15" "Start Nest environment" \
+    "16" "Start Angular environment" \
+    "17" "Start Mongo environment" \
     2>&1 1>&3)
   exit_status=$?
   exec 3>&-
@@ -81,8 +84,8 @@ while true; do
       docker attach --sig-proxy=false chestionare-auto_database_1
       ;;
     10 )
-      docker exec chestionare-auto_backend_1 npm --loglevel=error i;
-      docker exec chestionare-auto_frontend_1 npm --loglevel=error i;
+      docker run --rm -v $(pwd)/Chestionare-Auto-Frontend:/usr/src reydw/angular-dev npm --loglevel=error i
+      docker run --rm -v $(pwd)/Chestionare-Auto-Backend:/usr/src reydw/nest-dev npm --loglevel=error i
       ;;
     11 )
       rm -rf ./Chestionare-Auto-Backend/node_modules;
@@ -99,9 +102,18 @@ while true; do
         docker exec chestionare-auto_database_1 rm "category_$i.json"
       done
       ;;
-    10 )
-      docker exec chestionare-auto_backend_1 npm run build:prod;
-      docker exec chestionare-auto_frontend_1 npm run build:prod;
+    14 )
+      docker run --rm -v $(pwd)/Chestionare-Auto-Frontend:/usr/src reydw/angular-dev npm run build:prod
+      docker run --rm -v $(pwd)/Chestionare-Auto-Backend:/usr/src reydw/nest-dev npm run build:prod
+      ;;
+    15 )
+      docker run --rm -it -v $(pwd)/Chestionare-Auto-Frontend:/usr/src reydw/angular-dev
+      ;;
+    16 )
+      docker run --rm -it -v $(pwd)/Chestionare-Auto-Backend:/usr/src reydw/nest-dev
+      ;;
+    17 )
+      docker run --rm -it -v $(pwd):/usr/src mongo bash
       ;;
   esac
 done

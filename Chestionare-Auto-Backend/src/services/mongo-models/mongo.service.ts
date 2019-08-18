@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class MongoService {
-  private readonly _models: {
+  public readonly models: {
     category_a: Model<Chestionar>;
     category_b: Model<Chestionar>;
     category_c: Model<Chestionar>;
@@ -27,16 +27,12 @@ export class MongoService {
     @InjectModel('session')
     private readonly session: Model<Session>,
   ) {
-    this._models = {
+    this.models = {
       category_a: this.category_a,
       category_b: this.category_b,
       category_c: this.category_c,
       category_d: this.category_d,
       session: this.session,
     };
-  }
-
-  get models() {
-    return this._models;
   }
 }

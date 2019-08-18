@@ -6,6 +6,7 @@ import { Chestionar } from "src/app/interfaces/chestionar";
 import { Session } from "src/app/interfaces/session";
 
 import { SessionService } from "src/app/services/session.service";
+import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
 
 @Component({
   selector: "app-chestionar",
@@ -14,22 +15,22 @@ import { SessionService } from "src/app/services/session.service";
 })
 export class ChestionarComponent implements OnInit {
   @Input("session")
-  private session: Session;
+  public session: Session;
   @Input("now")
   private now: string;
 
   @Output("session_status")
   private session_status: EventEmitter<string>;
 
-  private _remaining_time: number;
-  private _answers: boolean[];
-  private _chestionar: Chestionar;
+  private remaining_time: { seconds: number; minutes: number };
+  private answers: boolean[];
+  public chestionar: Chestionar;
   public Math = Math;
 
-  private _timer: Timer;
-  private _chestionar_index;
-  private _token: string;
-  private _chestionar_generator: IterableIterator<{
+  private timer: Timer;
+  private chestionar_index;
+  private token: string;
+  private chestionar_generator: IterableIterator<{
     item: Chestionar;
     index: number;
   }>;
@@ -40,6 +41,7 @@ export class ChestionarComponent implements OnInit {
     this.answers = [false, false, false];
     this.token = localStorage.getItem("token");
     this.session_status = new EventEmitter<string>();
+    this.remaining_time = { minutes: 0, seconds: 0 };
     this.session = {
       created_at: "",
       chestionare: [],
@@ -55,21 +57,25 @@ export class ChestionarComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.remaining_time =
-      Date.parse(this.session.created_at) / 1000 +
-      1800 -
-      Date.parse(this.now) / 1000;
-    this.timer.onTick(time => {
-      this.remaining_time = time;
+    let calculated_time =
+      Date.parse(this.session.created_at) + 1800000 - Date.parse(this.now);
+
+    this.remaining_time.minutes = Math.floor(calculated_time / 60 / 1000);
+    this.remaining_time.seconds = Math.floor(calculated_time % 60);
+
+    this.timer.on("tick", time => {
+      this.remaining_time.minutes = Math.floor(time / 60 / 1000);
+      this.remaining_time.seconds = Math.floor(time % 60);
     });
-    this.timer.onDone(() => {
+
+    this.timer.on("done", () => {
       if (this.session.correct_answers >= 22) {
         this.session_status.emit("passed");
       } else {
         this.session_status.emit("failed");
       }
     });
-    this.timer.start(this.remaining_time);
+    this.timer.start(calculated_time);
     this.chestionar_generator = this.closed_loop_array_item_generator(
       this.session.chestionare
     );
@@ -146,66 +152,5 @@ export class ChestionarComponent implements OnInit {
     this.chestionar = item;
     this.chestionar_index = index;
     return false;
-  }
-
-  set remaining_time(remaining_time: number) {
-    this._remaining_time = remaining_time;
-  }
-
-  set answers(answers: boolean[]) {
-    this._answers = answers;
-  }
-
-  set chestionar(chestionar: Chestionar) {
-    this._chestionar = chestionar;
-  }
-
-  set timer(timer: Timer) {
-    this._timer = timer;
-  }
-
-  set chestionar_index(chestionar_index: number) {
-    this._chestionar_index = chestionar_index;
-  }
-
-  set token(token: string) {
-    this._token = token;
-  }
-
-  set chestionar_generator(
-    chestionar_generator: IterableIterator<{
-      item: Chestionar;
-      index: number;
-    }>
-  ) {
-    this._chestionar_generator = chestionar_generator;
-  }
-
-  get remaining_time() {
-    return this._remaining_time;
-  }
-
-  get answers() {
-    return this._answers;
-  }
-
-  get chestionar() {
-    return this._chestionar;
-  }
-
-  get timer() {
-    return this._timer;
-  }
-
-  get chestionar_index() {
-    return this._chestionar_index;
-  }
-
-  get token() {
-    return this._token;
-  }
-
-  get chestionar_generator() {
-    return this._chestionar_generator;
   }
 }

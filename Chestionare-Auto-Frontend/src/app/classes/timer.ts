@@ -1,11 +1,14 @@
-import { interval, Subscription, Observable } from "rxjs";
-import { tap, take, map } from "rxjs/operators";
+enum Status {
+  ticking,
+  paused,
+  stopped
+}
 
 export class Timer {
   private time: number;
   private tickTime: number;
-  private timer_handle: Observable<number>;
-  private timer_subscription: Subscription;
+  private status: Status;
+  private timer_handler: any;
   private tick: (time: number) => void;
   private done: () => void;
 
@@ -15,38 +18,64 @@ export class Timer {
     } else {
       this.tickTime = 1000;
     }
-    this.tick = time => {};
-    this.done = () => {};
+    this.status = Status.stopped;
   }
 
-  /**
-   * Start the timer
-   * @param time Time in seconds.
-   */
   start(time: number) {
+    if (this.status == Status.ticking || this.status == Status.paused) return;
     this.time = time;
-    this.stop();
-    this.timer_handle = interval(this.tickTime).pipe(
-      take(time),
-      map(elapsed_seconds => this.time - elapsed_seconds - 1),
-      tap(time => this.tick(time))
-    );
-    this.timer_subscription = this.timer_handle.subscribe(
-      value => {},
-      error => {},
-      () => this.done()
-    );
+    this.status = Status.ticking;
+    this.timer_handler = setInterval(() => {
+      if (this.time <= 0) {
+        this.done();
+        this.stop();
+      } else {
+        this.time--;
+        this.tick(this.time);
+      }
+    }, this.tickTime);
   }
 
-  onTick(tick: (time: number) => void) {
-    this.tick = tick;
+  setTicktime(tickTime: number) {
+    if (this.status == Status.ticking || this.status == Status.paused) return;
+    this.tickTime = tickTime;
   }
 
-  onDone(done: () => void) {
-    this.done = done;
+  pause() {
+    if (this.status == Status.stopped || this.status == Status.paused) return;
+    clearInterval(this.timer_handler);
+    this.status = Status.paused;
+  }
+
+  resume() {
+    if (this.status == Status.ticking || this.status == Status.stopped) return;
+    this.timer_handler = setInterval(() => {
+      if (this.time <= 0) {
+        this.done();
+        this.stop();
+      } else {
+        this.time--;
+        this.tick(this.time);
+      }
+    }, this.tickTime);
+    this.status = Status.ticking;
+  }
+
+  on(event: string, callback: (time?: number) => void) {
+    if (this.status == Status.ticking || this.status == Status.paused) return;
+    switch (event) {
+      case "tick":
+        this.tick = callback;
+        break;
+      case "done":
+        this.done = callback;
+        break;
+    }
   }
 
   stop() {
-    if (this.timer_subscription) this.timer_subscription.unsubscribe();
+    if (this.status == Status.stopped) return;
+    clearInterval(this.timer_handler);
+    this.status = Status.stopped;
   }
 }

@@ -9,7 +9,7 @@ import { filter } from "rxjs/operators";
   styleUrls: ["./app.component.css"]
 })
 export class AppComponent {
-  private _route: string;
+  public route: string;
 
   constructor(private router: Router) {
     this.route = "";
@@ -27,14 +27,6 @@ export class AppComponent {
             this.route = "";
         }
       });
-  }
-
-  set route(route: string) {
-    this._route = route;
-  }
-
-  get route(): string {
-    return this._route;
   }
 
   goto(location: string) {
