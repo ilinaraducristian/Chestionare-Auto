@@ -23,7 +23,7 @@ export class AppModule {
     let config;
     if (process.env.NODE_ENV == 'production') {
       config = dotenv.config({
-        path: './src/environments/environment.prod.env',
+        path: './environments/environment.prod.env',
       });
     } else {
       config = dotenv.config({ path: './src/environments/environment.env' });
