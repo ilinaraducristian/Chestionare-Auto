@@ -30,7 +30,7 @@ export class Timer {
         this.done();
         this.stop();
       } else {
-        this.time--;
+        this.time -= this.tickTime;
         this.tick(this.time);
       }
     }, this.tickTime);
@@ -54,7 +54,7 @@ export class Timer {
         this.done();
         this.stop();
       } else {
-        this.time--;
+        this.time -= this.tickTime;
         this.tick(this.time);
       }
     }, this.tickTime);

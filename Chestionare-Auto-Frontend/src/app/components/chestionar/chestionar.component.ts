@@ -60,12 +60,12 @@ export class ChestionarComponent implements OnInit {
     let calculated_time =
       Date.parse(this.session.created_at) + 1800000 - Date.parse(this.now);
 
-    this.remaining_time.minutes = Math.floor(calculated_time / 60 / 1000);
-    this.remaining_time.seconds = Math.floor(calculated_time % 60);
+    this.remaining_time.minutes = Math.floor(calculated_time / 1000 / 60);
+    this.remaining_time.seconds = Math.floor((calculated_time / 1000) % 60);
 
     this.timer.on("tick", time => {
-      this.remaining_time.minutes = Math.floor(time / 60 / 1000);
-      this.remaining_time.seconds = Math.floor(time % 60);
+      this.remaining_time.minutes = Math.floor(time / 1000 / 60);
+      this.remaining_time.seconds = Math.floor((time / 1000) % 60);
     });
 
     this.timer.on("done", () => {
