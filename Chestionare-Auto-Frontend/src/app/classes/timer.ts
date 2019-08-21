@@ -8,7 +8,7 @@ export class Timer {
   private time: number;
   private tickTime: number;
   private status: Status;
-  private timer_handler: any;
+  private timerHandler: any;
   private tick: (time: number) => void;
   private done: () => void;
 
@@ -25,7 +25,7 @@ export class Timer {
     if (this.status == Status.ticking || this.status == Status.paused) return;
     this.time = time;
     this.status = Status.ticking;
-    this.timer_handler = setInterval(() => {
+    this.timerHandler = setInterval(() => {
       if (this.time <= 0) {
         this.done();
         this.stop();
@@ -43,13 +43,13 @@ export class Timer {
 
   pause() {
     if (this.status == Status.stopped || this.status == Status.paused) return;
-    clearInterval(this.timer_handler);
+    clearInterval(this.timerHandler);
     this.status = Status.paused;
   }
 
   resume() {
     if (this.status == Status.ticking || this.status == Status.stopped) return;
-    this.timer_handler = setInterval(() => {
+    this.timerHandler = setInterval(() => {
       if (this.time <= 0) {
         this.done();
         this.stop();
@@ -75,7 +75,7 @@ export class Timer {
 
   stop() {
     if (this.status == Status.stopped) return;
-    clearInterval(this.timer_handler);
+    clearInterval(this.timerHandler);
     this.status = Status.stopped;
   }
 }

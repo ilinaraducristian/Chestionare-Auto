@@ -11,12 +11,12 @@ import { SessionService } from "src/app/services/session.service";
   styleUrls: ["./home.component.css"]
 })
 export class HomeComponent implements OnInit {
-  public shown_categories: object;
+  public shownCategories: object;
 
-  constructor(private router: Router, private session_service: SessionService) {
-    this.shown_categories = {};
+  constructor(private router: Router, private sessionService: SessionService) {
+    this.shownCategories = {};
     categories.forEach(category => {
-      this.shown_categories[category] = `Categoria ${category
+      this.shownCategories[category] = `Categoria ${category
         .substring(category.length - 1)
         .toUpperCase()}`;
     });
@@ -24,8 +24,8 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {}
 
-  new_session(key: string) {
-    this.session_service.category = key;
+  newSession(key: string) {
+    this.sessionService.category = key;
     this.router.navigate(["session"]);
     return false;
   }

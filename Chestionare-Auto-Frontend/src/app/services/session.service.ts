@@ -5,7 +5,7 @@ import { categories } from "../classes/categories";
 
 import { environment } from "../../environments/environment";
 
-import { BackendResponse } from "../interfaces/backend_response";
+import { BackendResponse } from "../interfaces/backend-response";
 
 import { Observable, throwError } from "rxjs";
 
@@ -14,15 +14,15 @@ import { Observable, throwError } from "rxjs";
 })
 export class SessionService {
   public category: string;
-  private json_headers: HttpHeaders;
+  private jsonHeaders: HttpHeaders;
 
   constructor(private http: HttpClient) {
-    this.json_headers = new HttpHeaders({
+    this.jsonHeaders = new HttpHeaders({
       "Content-Type": "application/json"
     });
   }
 
-  new_session(): Observable<BackendResponse> {
+  newSession(): Observable<BackendResponse> {
     if (!this.category) return throwError("Category not provided!");
     if (!categories.includes(this.category))
       return throwError("Wrong category!");
@@ -32,11 +32,11 @@ export class SessionService {
     );
   }
 
-  get_session(token: string): Observable<BackendResponse> {
+  getSession(token: string): Observable<BackendResponse> {
     return this.http.get<BackendResponse>(`${environment.backend}${token}`);
   }
 
-  send_answers(
+  sendSnswers(
     token: string,
     index: number,
     answers: string
@@ -44,7 +44,7 @@ export class SessionService {
     return this.http.put<BackendResponse>(
       `${environment.backend}${token}`,
       { id: index, answers },
-      { headers: this.json_headers }
+      { headers: this.jsonHeaders }
     );
   }
 }

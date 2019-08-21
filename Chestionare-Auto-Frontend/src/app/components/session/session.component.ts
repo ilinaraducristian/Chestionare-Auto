@@ -17,21 +17,21 @@ export class SessionComponent implements OnInit {
   public now: string;
   public status: string;
 
-  constructor(private router: Router, private session_service: SessionService) {
+  constructor(private router: Router, private sessionService: SessionService) {
     this.status = "loading";
   }
 
   ngOnInit() {
-    if (this.session_service.category == null) {
+    if (this.sessionService.category == null) {
       let token = localStorage.getItem("token");
       if (token == null) return this.router.navigate([""]);
-      this.session_service.get_session(token).subscribe(
+      this.sessionService.getSession(token).subscribe(
         response => {
           if (response.status) {
             if (response.status == "passed") {
-              this.show_passed();
+              this.showPassed();
             } else if (response.status == "failed") {
-              this.show_failed();
+              this.showFailed();
             }
             return;
           }
@@ -45,10 +45,10 @@ export class SessionComponent implements OnInit {
         }
       );
     } else {
-      this.session_service.new_session().subscribe(
+      this.sessionService.newSession().subscribe(
         response => {
           localStorage.setItem("token", response["token"]);
-          this.session_service.category = null;
+          this.sessionService.category = null;
           this.session = response["session"];
           this.now = response["now"];
           this.status = "working";
@@ -61,21 +61,21 @@ export class SessionComponent implements OnInit {
     }
   }
 
-  session_status(event: string) {
+  sessionStatus(event: string) {
     if (event == "passed") {
-      this.show_passed();
+      this.showPassed();
     } else {
-      this.show_failed();
+      this.showFailed();
     }
   }
 
-  show_passed(): void {
+  showPassed(): void {
     this.session = null;
     localStorage.removeItem("token");
     this.status = "passed";
   }
 
-  show_failed(): void {
+  showFailed(): void {
     this.session = null;
     localStorage.removeItem("token");
     this.status = "failed";
