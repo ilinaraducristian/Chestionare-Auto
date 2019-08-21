@@ -14,12 +14,12 @@ import { SessionSchema } from './schemas/session.schema';
 import { categories } from './categories';
 
 @Module({
-  imports: [AppModule.connect_mongo(), AppModule.generate_models()],
+  imports: [AppModule.connectMongo(), AppModule.generateModels()],
   controllers: [AppController],
   providers: [AppService, MongoService],
 })
 export class AppModule {
-  static connect_mongo() {
+  static connectMongo() {
     let config;
     if (process.env.NODE_ENV == 'production') {
       config = dotenv.config({
@@ -34,7 +34,7 @@ export class AppModule {
     });
   }
 
-  static generate_models() {
+  static generateModels() {
     let models: { name: string; schema; collection?: string }[];
     models = [{ name: 'session', schema: SessionSchema }];
     categories.forEach(category => {

@@ -12,7 +12,7 @@ services:
       - start:dev
 
   frontend:
-    image: reydw/angular-dev
+    image: reydw/node-dev
     ports:
       - 4200:4200
     volumes:
