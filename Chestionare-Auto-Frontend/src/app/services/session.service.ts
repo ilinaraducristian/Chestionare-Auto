@@ -28,7 +28,10 @@ export class SessionService {
       return throwError("Wrong category!");
     return this.http.post<BackendResponse>(
       `${environment.backend}${this.category}`,
-      null
+      null,
+      {
+        withCredentials: true
+      }
     );
   }
 

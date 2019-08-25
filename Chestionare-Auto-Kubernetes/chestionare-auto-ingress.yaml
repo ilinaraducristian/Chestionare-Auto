@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: chestionare-auto-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "1800000"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "1800000"
+
+spec:
+  rules:
+    - host: chestionare.auto.com
+      http:
+        paths:
+          - backend:
+              serviceName: chestionare-auto-nest
+              servicePort: 5000
+            path: /

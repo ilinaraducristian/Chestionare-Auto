@@ -1,11 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chestionare-auto
+  name: chestionare-auto-nest
   labels:
     app: nest
 spec:
-  replicas: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nest
   template:
     metadata:
       labels:
@@ -13,6 +16,6 @@ spec:
     spec:
       containers:
         - name: nest
-          image: reydw/chestionare-auto-nest
+          image: reydw/chestionare-auto-nest:v5
           ports:
             - containerPort: 5000

@@ -1,6 +1,7 @@
 {
   "name": "chestionare-auto-frontend",
   "version": "0.0.0",
+  "license": "LGPL-3.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

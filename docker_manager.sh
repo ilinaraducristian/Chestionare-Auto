@@ -40,35 +40,41 @@ while true; do
   exec 3>&-
   case $exit_status in
     $DIALOG_CANCEL)
-      clear
+      clear;
       exit
       ;;
     $DIALOG_ESC)
-      clear
+      clear;
       exit
       ;;
   esac
   case $selection in
     0 )
-      clear
+      clear;
       echo "Program terminated."
       ;;
     1 )
+      clear;
       sudo systemctl start docker
       ;;
     2 )
+      clear;
       sudo systemctl stop docker
       ;;
     3 )
+      clear;
       docker-compose up -d
       ;;
     4 )
+      clear;
       docker-compose stop
       ;;
     5 )
+      clear;
       docker-compose down
       ;;
     6 )
+      clear;
       docker-compose restart
       ;;
     7 )
@@ -84,17 +90,21 @@ while true; do
       docker attach --sig-proxy=false chestionare-auto_database_1
       ;;
     10 )
-      docker run --rm -v $(pwd)/Chestionare-Auto-Frontend:/usr/src reydw/angular-dev npm --loglevel=error i
-      docker run --rm -v $(pwd)/Chestionare-Auto-Backend:/usr/src reydw/nest-dev npm --loglevel=error i
+      clear;
+      cd ./Chestionare-Auto-Frontend && npm i;
+      cd ../Chestionare-Auto-Backend && npm i;
       ;;
     11 )
+      clear;
       rm -rf ./Chestionare-Auto-Backend/node_modules;
 	    rm -rf ./Chestionare-Auto-Frontend/node_modules;
       ;;
     12 )
+      clear;
       sudo chown -R reydw *
       ;;
     13 )
+      clear;
       collections=(a b c d)
       for i in "${collections[@]}"; do
         docker cp "category_$i.json" chestionare-auto_database_1:/
@@ -103,16 +113,20 @@ while true; do
       done
       ;;
     14 )
-      docker run --rm -v $(pwd)/Chestionare-Auto-Frontend:/usr/src reydw/angular-dev npm run build:prod
-      docker run --rm -v $(pwd)/Chestionare-Auto-Backend:/usr/src reydw/nest-dev npm run build:prod
+      clear;
+      cd ./Chestionare-Auto-Frontend && npm run build:prod
+      cd ../Chestionare-Auto-Backend && npm run build:prod
       ;;
     15 )
+      clear;
       docker run --rm -it -v $(pwd)/Chestionare-Auto-Frontend:/usr/src reydw/angular-dev
       ;;
     16 )
+      clear;
       docker run --rm -it -v $(pwd)/Chestionare-Auto-Backend:/usr/src reydw/nest-dev
       ;;
     17 )
+      clear;
       docker run --rm -it -v $(pwd):/usr/src mongo bash
       ;;
   esac

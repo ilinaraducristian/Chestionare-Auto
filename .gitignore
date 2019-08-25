@@ -53,6 +53,7 @@ Thumbs.db
 
 /Chestionare-Auto-Kubernetes/chestionare-auto-nest/*
 !/Chestionare-Auto-Kubernetes/chestionare-auto-nest/Dockerfile
+!/Chestionare-Auto-Kubernetes/chestionare-auto-nest/package.json
 
 /Chestionare-Auto-Kubernetes/chestionare-auto-angular/*
 !/Chestionare-Auto-Kubernetes/chestionare-auto-angular/Dockerfile

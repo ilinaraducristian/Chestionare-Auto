@@ -35,8 +35,8 @@ export class SessionComponent implements OnInit {
             }
             return;
           }
-          this.session = response["session"];
-          this.now = response["now"];
+          this.session = response.session;
+          this.now = response.now;
           this.status = "working";
         },
         error => {
